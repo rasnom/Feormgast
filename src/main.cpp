@@ -10,11 +10,14 @@ const char *PASSWORD = AP_WIFI_PASSWORD;
 WiFiServer server(80);
 
 String header;
-String lightState;
 
+bool lightOn = false;
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
-const long timeoutTime = 2000; // milliseconds
+unsigned long lightOnTime = 0;
+const long wifiTimeoutTime = 2000; // milliseconds
+const long lightDuration = 3000;
+
 
 void setup() {
   Serial.begin(115200);
@@ -32,18 +35,23 @@ void setup() {
 
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
-  lightState = "off";
 }
 
 void loop() {
   WiFiClient client = server.available();
+
+  if (lightOn && millis() - lightOnTime >= lightDuration) {
+    Serial.println("Light turns itself off");
+    digitalWrite(LED, LOW);
+    lightOn = false;
+  }
 
   if (client) {
     currentTime = millis();
     previousTime = currentTime;
     Serial.println("New Client.");
     String currentLine = "";
-    while (client.connected() && currentTime - previousTime <= timeoutTime ) {
+    while (client.connected() && currentTime - previousTime <= wifiTimeoutTime ) {
       currentTime = millis();
       if (client.available()) {
         char c = client.read();
@@ -63,12 +71,14 @@ void loop() {
             // Turn LED on or off
             if (header.indexOf("GET /light/on") >= 0) {
               Serial.println("Turn light ON");
-              lightState = "on";
               digitalWrite(LED, HIGH);
-            } else if (header.indexOf("GET /light/off") >= 0) {
+              lightOn = true;
+              lightOnTime = currentTime;
+            } 
+            else if (header.indexOf("GET /light/off") >= 0) {
               Serial.println("Turn light OFF");
-              lightState = "off";
               digitalWrite(LED, LOW);
+              lightOn = false;
             }
 
             // HTML header start
@@ -85,15 +95,18 @@ void loop() {
             client.println("<body><h1><Feormgast Web Server</h1>");
 
             // Current state
-            client.println("<p>LED Light State - " + lightState + "</p>");
-            if (lightState == "off") {
-              client.println("<p><a href=\"/light/on\"><button class=\"button\">ON</button></a></p>");
+            client.print("<p>LED Light State - ");
+            if (lightOn) {
+              client.println("ON</p>");
+              client.println("<p><a href=\"/light/off\"><button class=\"button button2\">Turn OFF</button></a></p>");
             } else {
-              client.println("<p><a href=\"/light/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("OFF</p>");
+              client.println("<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>");
             }
             client.println("</body></html>");
 
             client.println(); // consecutive newline indicates end of message
+            Serial.println("*** break");
             break;
           } else {
             currentLine = "";
@@ -109,4 +122,4 @@ void loop() {
     Serial.println("Client disconnected.");
     Serial.println("");    
   }
-}
+ }
