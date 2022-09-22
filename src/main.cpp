@@ -3,6 +3,8 @@
 #include "secrets.h"
 
 #define LED 2
+#define OPENPIN 22
+#define CLOSEPIN 23
 
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
@@ -11,12 +13,12 @@ WiFiServer server(80);
 
 String header;
 
-bool lightOn = false;
+bool motorOn = false;
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
-unsigned long lightOnTime = 0;
+unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
-const long lightDuration = 3000;
+const long motorDuration = 20000;
 
 
 void setup() {
@@ -35,15 +37,19 @@ void setup() {
 
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
-}
+  pinMode(OPENPIN, OUTPUT);
+  digitalWrite(OPENPIN, LOW);
+  pinMode(CLOSEPIN, OUTPUT);
+  digitalWrite(CLOSEPIN, LOW);}
 
 void loop() {
   WiFiClient client = server.available();
 
-  if (lightOn && millis() - lightOnTime >= lightDuration) {
-    Serial.println("Light turns itself off");
+  if (motorOn && millis() - motorOnTime >= motorDuration) {
+    digitalWrite(OPENPIN, LOW);
+    digitalWrite(CLOSEPIN, LOW);
     digitalWrite(LED, LOW);
-    lightOn = false;
+    motorOn = false;
   }
 
   if (client) {
@@ -72,13 +78,24 @@ void loop() {
             if (header.indexOf("GET /light/on") >= 0) {
               Serial.println("Turn light ON");
               digitalWrite(LED, HIGH);
-              lightOn = true;
-              lightOnTime = currentTime;
             } 
             else if (header.indexOf("GET /light/off") >= 0) {
-              Serial.println("Turn light OFF");
+              Serial.println("Also turn light OFF");
               digitalWrite(LED, LOW);
-              lightOn = false;
+            }  
+            else if (header.indexOf("GET /door/open") >= 0) {
+              Serial.println("Opening door...");
+              digitalWrite(LED, HIGH);
+              digitalWrite(OPENPIN, HIGH);
+              motorOn = true;
+              motorOnTime = currentTime;
+            } 
+            else if (header.indexOf("GET /door/close") >= 0) {
+              Serial.println("Closing Door");
+              digitalWrite(LED, HIGH);
+              digitalWrite(CLOSEPIN, HIGH);
+              motorOn = true;
+              motorOnTime = currentTime;
             }
 
             // HTML header start
@@ -94,15 +111,21 @@ void loop() {
             // Web Page Heading
             client.println("<body><h1><Feormgast Web Server</h1>");
 
-            // Current state
+            // light controls 
             client.print("<p>LED Light State - ");
-            if (lightOn) {
+            if (motorOn) {
               client.println("ON</p>");
-              client.println("<p><a href=\"/light/off\"><button class=\"button button2\">Turn OFF</button></a></p>");
             } else {
               client.println("OFF</p>");
-              client.println("<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>");
             }
+            client.println("<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>");
+            client.println("<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>");
+
+            // motor controls
+            client.println("<h2>Chicken Coop Door</h2>");
+            client.println("<p><a href=\"/door/open\"><button class=\"button\">OPEN</button></a></p>");
+            client.println("<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>");
+
             client.println("</body></html>");
 
             client.println(); // consecutive newline indicates end of message
