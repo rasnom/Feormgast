@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <Webserver.h>
+// #include <HTTPUpdateServer.h>
 #include "secrets.h"
 
 #define LED 2
@@ -9,7 +11,8 @@
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 
-WiFiServer server(80);
+WebServer server(80);
+// HTTPUpdateServer httpUpdater;
 
 String header;
 
@@ -20,49 +23,71 @@ unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
 const long motorDuration = 5000;
 
-void sendResponse(WiFiClient &client) {
-  // Response code
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-type:text/html");
-  client.println("Connection: close");
-  client.println();
-}
+const char* serverIndex = 
+  "<html>"
+    "<head>"
+      "<style>"
+        "html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}"
+        ".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;"
+        "text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}"
+        ".button2 {background-color: #555555;}"
+      "</style>"
+    "</head>"
 
-void sendText(WiFiClient &client) {
-  // HTML header start
-  client.println("<!DOCTYPE html><html>");
-  client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-  client.println("<link rel=\"icon\" href=\"data:,\">");
-  // CSS to style the on/off button 
-  client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
-  client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
-  client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-  client.println(".button2 {background-color: #555555;}</style></head>");
+    "<body>"
+      "<h1>Feormgast Web Server</h1>"
 
-  // Web page Heading
-  client.println("<body><h1><Feormgast Web Server</h1>");
+      "<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>"
+      "<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>"
 
-  // Light controls 
-  client.print("<p>LED Light State - ");
-  if (motorOn) {
-    client.println("ON</p>");
-  } else {
-    client.println("OFF</p>");
-  }
-  client.println("<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>");
-  client.println("<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>");
+      "<h2>Chicken Coop Door</h2>"
+      "<p><a href=\"/door/open\"><button class=\"button\">OPEN</button></a></p>"
+      "<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>"
 
-  // Motor controls
-  client.println("<h2>Chicken Coop Door</h2>");
-  client.println("<p><a href=\"/door/open\"><button class=\"button\">OPEN</button></a></p>");
-  client.println("<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>");
+    "</body>"
+  "</html>";
+  
 
-  client.println("</body></html>");
-  client.println(); // consecutive newline indicates end of message 
+void setupRoutes() {
+  server.on("/", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+  });  
+  server.on("/light/on", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+    digitalWrite(LED, HIGH);
+  });
+  server.on("/light/off", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+    digitalWrite(LED, LOW);
+  });
+  server.on("/door/open", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+    digitalWrite(LED, HIGH);
+    motorOn = true;
+    motorOnTime = millis();
+    digitalWrite(OPENPIN, HIGH);
+  });
+  server.on("/door/close", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+    digitalWrite(LED, HIGH);
+    motorOn = true;
+    motorOnTime = millis();
+    digitalWrite(CLOSEPIN, HIGH);
+  });
+  server.onNotFound( []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+  });
 }
 
 void setup() {
   Serial.begin(115200);
+  while(!Serial) { delay(10); }
 
   // Create Wifi Access Point
   Serial.print("Creating network ");
@@ -73,6 +98,8 @@ void setup() {
   Serial.print(" at IP: ");
   Serial.println(IP);
 
+  // httpUpdater.setup(&server);
+  setupRoutes();
   server.begin();
 
   pinMode(LED, OUTPUT);
@@ -80,10 +107,11 @@ void setup() {
   pinMode(OPENPIN, OUTPUT);
   digitalWrite(OPENPIN, LOW);
   pinMode(CLOSEPIN, OUTPUT);
-  digitalWrite(CLOSEPIN, LOW);}
+  digitalWrite(CLOSEPIN, LOW);
+}
 
 void loop() {
-  WiFiClient client = server.available();
+  // WiFiClient client = server.available();
 
   if (motorOn && millis() - motorOnTime >= motorDuration) {
     digitalWrite(OPENPIN, LOW);
@@ -92,64 +120,6 @@ void loop() {
     motorOn = false;
   }
 
-  if (client) {
-    currentTime = millis();
-    previousTime = currentTime;
-    Serial.println("New Client.");
-    String currentLine = "";
-    while (client.connected() && currentTime - previousTime <= wifiTimeoutTime ) {
-      currentTime = millis();
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-        header += c;
-        if (c == '\n') {
-          // After the end of a line, currentLine gets wiped
-          // If it is alread wiped then that double newline
-          // marks the end of the message.
-          if (currentLine.length() == 0) {
-            sendResponse(client);
-
-            // Turn LED on or off
-            if (header.indexOf("GET /light/on") >= 0) {
-              Serial.println("Turn light ON");
-              digitalWrite(LED, HIGH);
-            } 
-            else if (header.indexOf("GET /light/off") >= 0) {
-              Serial.println("Also turn light OFF");
-              digitalWrite(LED, LOW);
-            }  
-            else if (header.indexOf("GET /door/open") >= 0) {
-              Serial.println("Opening door...");
-              digitalWrite(LED, HIGH);
-              digitalWrite(OPENPIN, HIGH);
-              motorOn = true;
-              motorOnTime = currentTime;
-            } 
-            else if (header.indexOf("GET /door/close") >= 0) {
-              Serial.println("Closing Door");
-              digitalWrite(LED, HIGH);
-              digitalWrite(CLOSEPIN, HIGH);
-              motorOn = true;
-              motorOnTime = currentTime;
-            }
-
-            sendText(client);
-
-            Serial.println("*** break");
-            break;
-          } else {
-            currentLine = "";
-          }
-        } else if (c != '\r') {
-          currentLine += c;
-        }
-      }
-    }
-    // Clear header & close connection
-    header = "";
-    client.stop();
-    Serial.println("Client disconnected.");
-    Serial.println("");    
-  }
- }
+  server.handleClient();
+  delay(2);
+}
