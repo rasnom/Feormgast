@@ -21,103 +21,112 @@ unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
 const long motorDuration = 5000;
 
-const char *serverIndex = 
-  "<!DOCTYPE html>"
-  "<head>"
-    "<style>"
-      "html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}"
-      ".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;"
-      "text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}"
-      ".button2 {background-color: #555555;}"
-    "</style>"
-  "</head>"
+String serverIndex() {
+  String indexHtml = 
+    "<!DOCTYPE html>"
+    "<head>"
+      "<style>"
+        "html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}"
+        ".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;"
+        "text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}"
+        ".button2 {background-color: #555555;}"
+      "</style>"
+    "</head>"
 
-  "<body>"
-    "<h1>Feormgast Web Server</h1>"
-    "<div id = \"digital-clock\"> </div>"
+    "<body>"
+      "<h1>Feormgast Web Server</h1>"
+      "<div id = \"digital-clock\"> </div>"
 
-    "<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>"
-    "<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>"
+      "<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>"
+      "<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>"
 
-    "<h2>Chicken Coop Door</h2>"
-    "<p><a href=\"/door/open\"><button class=\"button\">OPEN</button></a></p>"
-    "<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>"
+      "<h2>Chicken Coop Door</h2>"
+      "<p><a href=\"/door/open\"><button class=\"button\">OPEN</button></a></p>"
+      "<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>"
 
-    "<script src = \"script.js\"> </script>"
-  "</body>";
+      "<script src = \"script.js\"> </script>"
+    "</body>";
+  return indexHtml;
+}
   
-const char *updateForm = 
-  "<form method='POST' action='/update' enctype='multipart/form-data'>"
-    "<input type='file' name='update'><input type='submit' value='Update'>"
-  "</form>";
+String updateForm() {
+  String formHtml = 
+    "<form method='POST' action='/update' enctype='multipart/form-data'>"
+      "<input type='file' name='update'><input type='submit' value='Update'>"
+    "</form>";
+  return formHtml;
+}
 
-const char *javaScript = 
-  "function Time() {\n"
-      "// Creating object of the Date class\n"
-      "var date = new Date();\n"
-      "// Get current hour\n"
-      "var hour = date.getHours();\n"
-      "// Get current minute\n"
-      "var minute = date.getMinutes();\n"
-      "// Get current second\n"
-      "var second = date.getSeconds();\n"
-      "// Variable to store AM / PM\n"
-      "var period = \"\";\n"
-      "// Assigning AM / PM according to the current hour\n"
-      "if (hour >= 12) {\n"
-      "period = \"PM\";\n"
-      "} else {\n"
-      "period = \"AM\";\n"
-      "}\n"
-      "// Converting the hour in 12-hour format\n"
-      "if (hour == 0) {\n"
-      "hour = 12;\n"
-      "} else {\n"
-      "if (hour > 12) {\n"
-      "hour = hour - 12;\n"
-      "}\n"
-      "}\n"
-      "// Updating hour, minute, and second\n"
-      "// if they are less than 10\n"
-      "hour = update(hour);\n"
-      "minute = update(minute);\n"
-      "second = update(second);\n"
-      "// Adding time elements to the div\n"
-      "document.getElementById(\"digital-clock\").innerText = hour + \" : \" + minute + \" : \" + second + \" \" + period;\n"
-      "// Set Timer to 1 sec (1000 ms)\n"
-      "setTimeout(Time, 1000);\n"
-  "}\n"
-      "// Function to update time elements if they are less than 10\n"
-      "// Append 0 before time elements if they are less than 10\n"
-  "function update(t) {\n"
-      "if (t < 10) {\n"
-      "return \"0\" + t;\n"
-      "}\n"
-      "else {\n"
-      "return t;\n"
-      "}\n"
-  "}\n"
-  "Time();\n"
-;
+String javaScript() {
+  String jscriptCode = 
+    "function Time() {\n"
+        "// Creating object of the Date class\n"
+        "var date = new Date();\n"
+        "// Get current hour\n"
+        "var hour = date.getHours();\n"
+        "// Get current minute\n"
+        "var minute = date.getMinutes();\n"
+        "// Get current second\n"
+        "var second = date.getSeconds();\n"
+        "// Variable to store AM / PM\n"
+        "var period = \"\";\n"
+        "// Assigning AM / PM according to the current hour\n"
+        "if (hour >= 12) {\n"
+        "period = \"PM\";\n"
+        "} else {\n"
+        "period = \"AM\";\n"
+        "}\n"
+        "// Converting the hour in 12-hour format\n"
+        "if (hour == 0) {\n"
+        "hour = 12;\n"
+        "} else {\n"
+        "if (hour > 12) {\n"
+        "hour = hour - 12;\n"
+        "}\n"
+        "}\n"
+        "// Updating hour, minute, and second\n"
+        "// if they are less than 10\n"
+        "hour = update(hour);\n"
+        "minute = update(minute);\n"
+        "second = update(second);\n"
+        "// Adding time elements to the div\n"
+        "document.getElementById(\"digital-clock\").innerText = hour + \" : \" + minute + \" : \" + second + \" \" + period;\n"
+        "// Set Timer to 1 sec (1000 ms)\n"
+        "setTimeout(Time, 1000);\n"
+    "}\n"
+        "// Function to update time elements if they are less than 10\n"
+        "// Append 0 before time elements if they are less than 10\n"
+    "function update(t) {\n"
+        "if (t < 10) {\n"
+        "return \"0\" + t;\n"
+        "}\n"
+        "else {\n"
+        "return t;\n"
+        "}\n"
+    "}\n"
+    "Time();\n";
+  Serial.println(jscriptCode);
+  return jscriptCode;
+}
 
 void setupRoutes() {
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+    server.send(200, "text/html", serverIndex());
   });  
   server.on("/light/on", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+    server.send(200, "text/html", serverIndex());
     digitalWrite(LED, HIGH);
   });
   server.on("/light/off", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+    server.send(200, "text/html", serverIndex());
     digitalWrite(LED, LOW);
   });
   server.on("/door/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+    server.send(200, "text/html", serverIndex());
     digitalWrite(LED, HIGH);
     motorOn = true;
     motorOnTime = millis();
@@ -125,7 +134,7 @@ void setupRoutes() {
   });
   server.on("/door/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+    server.send(200, "text/html", serverIndex());
     digitalWrite(LED, HIGH);
     motorOn = true;
     motorOnTime = millis();
@@ -133,7 +142,7 @@ void setupRoutes() {
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", updateForm);
+    server.send(200, "text/html", updateForm());
   });
   server.on("/update", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
@@ -164,11 +173,11 @@ void setupRoutes() {
   });
   server.on("/script.js", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/javascript", javaScript);
+    server.send(200, "text/javascript", javaScript());
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", "Unknown Request");
+    server.send(404, "text/plain", "Unknown Request");
     Serial.println("route not found");
     Serial.println(server.uri());
   });
