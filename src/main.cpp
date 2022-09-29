@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include <Webserver.h>
 #include <Update.h>
+#include <ESP32Time.h>
 #include "secrets.h"
 
 #define LED 2
@@ -10,16 +11,16 @@
 
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
-
-WebServer server(80);
-String header;
-
 bool motorOn = false;
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
 unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
 const long motorDuration = 5000;
+
+WebServer server(80);
+String header;
+ESP32Time rtc;
 
 String serverIndex() {
   String indexHtml = 
@@ -35,7 +36,17 @@ String serverIndex() {
 
     "<body>"
       "<h1>Feormgast Web Server</h1>"
-      "<div id = \"digital-clock\"> </div>"
+      "<p>"
+        "<div>internal clock :</div>";
+        "<div>";
+  indexHtml.concat(rtc.getTime());
+  indexHtml.concat(
+        "</div>"
+      "</p>"
+      "<p>"
+        "<div>user's clock : </div>"
+        "<div id = \"digital-clock\"> </div>"
+      "</p>"
 
       "<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>"
       "<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>"
@@ -45,7 +56,8 @@ String serverIndex() {
       "<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>"
 
       "<script src = \"script.js\"> </script>"
-    "</body>";
+    "</body>"
+  );
   return indexHtml;
 }
   
@@ -105,7 +117,6 @@ String javaScript() {
         "}\n"
     "}\n"
     "Time();\n";
-  Serial.println(jscriptCode);
   return jscriptCode;
 }
 
