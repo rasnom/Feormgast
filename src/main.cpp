@@ -47,7 +47,14 @@ String serverIndex() {
         "<div>user's clock : </div>"
         "<div id = \"digital-clock\"> </div>"
       "</p>"
+      "<p>"
+        "<form method='GET' action='/clocksync'>"
+          "<input type='hidden' id='clientMillis' name='clientMillis' value=0>"
+          "<input type='hidden' id='clientOffset' name='clientOffset' value=0>"
+          "<input type='submit' value='Sync Local Clock'>"
+        "</form>"
 
+      "</p>" 
       "<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>"
       "<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>"
 
@@ -74,6 +81,9 @@ String javaScript() {
     "function Time() {\n"
         "// Creating object of the Date class\n"
         "var date = new Date();\n"
+        "var year = date.getYear();\n"
+        "var month = date.getMonth();\n"
+        "var day = date.getDay();\n"
         "// Get current hour\n"
         "var hour = date.getHours();\n"
         "// Get current minute\n"
@@ -103,7 +113,9 @@ String javaScript() {
         "second = update(second);\n"
         "// Adding time elements to the div\n"
         "document.getElementById(\"digital-clock\").innerText = hour + \" : \" + minute + \" : \" + second + \" \" + period;\n"
-        "// Set Timer to 1 sec (1000 ms)\n"
+        "document.getElementById('clientOffset').value = date.getTimezoneOffset();\n"
+        "document.getElementById('clientMillis').value = date.getTime();\n"
+        "// Set Timer to 1 sec (1000 ms)\n"  
         "setTimeout(Time, 1000);\n"
     "}\n"
         "// Function to update time elements if they are less than 10\n"
@@ -118,6 +130,24 @@ String javaScript() {
     "}\n"
     "Time();\n";
   return jscriptCode;
+}
+
+void clockSync() {
+  String clientMillis;
+  long long millis;
+  long offset; 
+
+  clientMillis = server.arg("clientMillis");
+  offset = 60 * atol(server.arg("clientOffset").c_str());
+  Serial.print("Offset    ");
+  Serial.println(offset);
+  millis = atoll(clientMillis.c_str()) / 1000 - offset;
+  Serial.print("long long   ");
+  Serial.println(millis);
+  rtc.setTime(millis);
+  
+  server.sendHeader("Connection", "close");
+  server.send(200, "text/html", serverIndex());
 }
 
 void setupRoutes() {
@@ -185,6 +215,10 @@ void setupRoutes() {
   server.on("/script.js", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/javascript", javaScript());
+  });
+  server.on("/clocksync", HTTP_GET, []() {
+    Serial.println(server.args());
+    clockSync();
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
