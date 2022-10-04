@@ -8,15 +8,19 @@
 #define LED 2
 #define OPENPIN 22
 #define CLOSEPIN 23
+#define OPENTIME 7
+#define CLOSETIME 20
 
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 bool motorOn = false;
+bool coopOpen = false;
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
 unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
 const long motorDuration = 5000;
+
 
 WebServer server(80);
 String header;
@@ -138,14 +142,10 @@ void clockSync() {
   long offset; 
 
   clientMillis = server.arg("clientMillis");
-  offset = 60 * atol(server.arg("clientOffset").c_str());
-  Serial.print("Offset    ");
-  Serial.println(offset);
+  offset = 60 * atol(server.arg("clientOffset").c_str()); // UTC offset
   millis = atoll(clientMillis.c_str()) / 1000 - offset;
-  Serial.print("long long   ");
-  Serial.println(millis);
-  rtc.setTime(millis);
-  
+  // rtc.setTime(millis);
+  rtc.setTime(40, 59, 6, 1, 1, 2023);  
   server.sendHeader("Connection", "close");
   server.send(200, "text/html", serverIndex());
 }
@@ -230,7 +230,7 @@ void setupRoutes() {
 
 void setup() {
   Serial.begin(115200);
-  while(!Serial) { delay(10); }
+  while(!Serial) { delay(10); };
 
   // Create Wifi Access Point
   Serial.print("Creating network ");
@@ -240,6 +240,7 @@ void setup() {
   IPAddress IP = WiFi.softAPIP();
   Serial.print(" at IP: ");
   Serial.println(IP);
+  Serial.print("host   ");
 
   setupRoutes();
   server.begin();
@@ -252,6 +253,28 @@ void setup() {
   digitalWrite(CLOSEPIN, LOW);
 }
 
+void manageDoor() {
+  int hour = rtc.getHour();
+
+  if ((OPENTIME <= hour) && (hour < CLOSETIME)) {
+    if (!coopOpen) {
+      digitalWrite(LED, HIGH);
+      motorOn = true;
+      motorOnTime = millis();
+      digitalWrite(OPENPIN, HIGH);
+      Serial.println("Opening coop door");
+      coopOpen = true;
+    }
+  } else if (coopOpen) {
+    digitalWrite(LED, HIGH);
+    motorOn = true;
+    motorOnTime = millis();
+    digitalWrite(CLOSEPIN, HIGH);
+    Serial.println("Closing coop door");
+    coopOpen = false;
+  }
+}
+
 void loop() {
   if (motorOn && millis() - motorOnTime >= motorDuration) {
     digitalWrite(OPENPIN, LOW);
@@ -259,6 +282,7 @@ void loop() {
     digitalWrite(LED, LOW);
     motorOn = false;
   }
+  manageDoor();
   server.handleClient();
   delay(2);
 }
