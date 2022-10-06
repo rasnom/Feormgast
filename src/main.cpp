@@ -28,23 +28,15 @@ String header;
 ESP32Time rtc;
 
 String serverIndex() {
-  Serial.println("Trying to read files?");
-  // File file = SPIFFS.open("/index.html");
-  File root = SPIFFS.open("/");
   File file;
   String fileText;
-
-  while (file = root.openNextFile()) {
-    Serial.print("File:  ");
-    Serial.println(file.name());
-  }
 
   file = SPIFFS.open("/index.html");
   if(!file) {
     Serial.println("failed to load index.html from SPIFFS");
   }
   fileText = file.readString();
-  Serial.println(fileText);
+  fileText.replace("%LOCAL_TIME%", rtc.getTime());
 
   return fileText;
 }
@@ -121,8 +113,7 @@ void clockSync() {
   clientMillis = server.arg("clientMillis");
   offset = 60 * atol(server.arg("clientOffset").c_str()); // UTC offset
   millis = atoll(clientMillis.c_str()) / 1000 - offset;
-  // rtc.setTime(millis);
-  rtc.setTime(40, 59, 6, 1, 1, 2023);  
+  rtc.setTime(millis);
   server.sendHeader("Connection", "close");
   server.send(200, "text/html", serverIndex());
 }
