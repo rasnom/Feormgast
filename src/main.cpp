@@ -3,6 +3,7 @@
 #include <Webserver.h>
 #include <Update.h>
 #include <ESP32Time.h>
+#include <SPIFFS.h>
 #include "secrets.h"
 
 #define LED 2
@@ -27,49 +28,25 @@ String header;
 ESP32Time rtc;
 
 String serverIndex() {
-  String indexHtml = 
-    "<!DOCTYPE html>"
-    "<head>"
-      "<style>"
-        "html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}"
-        ".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;"
-        "text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}"
-        ".button2 {background-color: #555555;}"
-      "</style>"
-    "</head>"
+  Serial.println("Trying to read files?");
+  // File file = SPIFFS.open("/index.html");
+  File root = SPIFFS.open("/");
+  File file;
+  String fileText;
 
-    "<body>"
-      "<h1>Feormgast Web Server</h1>"
-      "<p>"
-        "<div>internal clock :</div>";
-        "<div>";
-  indexHtml.concat(rtc.getTime());
-  indexHtml.concat(
-        "</div>"
-      "</p>"
-      "<p>"
-        "<div>user's clock : </div>"
-        "<div id = \"digital-clock\"> </div>"
-      "</p>"
-      "<p>"
-        "<form method='GET' action='/clocksync'>"
-          "<input type='hidden' id='clientMillis' name='clientMillis' value=0>"
-          "<input type='hidden' id='clientOffset' name='clientOffset' value=0>"
-          "<input type='submit' value='Sync Local Clock'>"
-        "</form>"
+  while (file = root.openNextFile()) {
+    Serial.print("File:  ");
+    Serial.println(file.name());
+  }
 
-      "</p>" 
-      "<p><a href=\"/light/on\"><button class=\"button\">Turn ON</button></a></p>"
-      "<p><a href=\"/light/on\"><button class=\"button button2\">ALSO ON</button></a></p>"
+  file = SPIFFS.open("/index.html");
+  if(!file) {
+    Serial.println("failed to load index.html from SPIFFS");
+  }
+  fileText = file.readString();
+  Serial.println(fileText);
 
-      "<h2>Chicken Coop Door</h2>"
-      "<p><a href=\"/door/open\"><button class=\"button\">OPEN</button></a></p>"
-      "<p><a href=\"/door/close\"><button class=\"button\">CLOSE</button></a></p>"
-
-      "<script src = \"script.js\"> </script>"
-    "</body>"
-  );
-  return indexHtml;
+  return fileText;
 }
   
 String updateForm() {
@@ -228,6 +205,28 @@ void setupRoutes() {
   });
 }
 
+void manageDoor() {
+  int hour = rtc.getHour();
+
+  if ((OPENTIME <= hour) && (hour < CLOSETIME)) {
+    if (!coopOpen) {
+      digitalWrite(LED, HIGH);
+      motorOn = true;
+      motorOnTime = millis();
+      digitalWrite(OPENPIN, HIGH);
+      Serial.println("Opening coop door");
+      coopOpen = true;
+    }
+  } else if (coopOpen) {
+    digitalWrite(LED, HIGH);
+    motorOn = true;
+    motorOnTime = millis();
+    digitalWrite(CLOSEPIN, HIGH);
+    Serial.println("Closing coop door");
+    coopOpen = false;
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   while(!Serial) { delay(10); };
@@ -251,27 +250,10 @@ void setup() {
   digitalWrite(OPENPIN, LOW);
   pinMode(CLOSEPIN, OUTPUT);
   digitalWrite(CLOSEPIN, LOW);
-}
 
-void manageDoor() {
-  int hour = rtc.getHour();
-
-  if ((OPENTIME <= hour) && (hour < CLOSETIME)) {
-    if (!coopOpen) {
-      digitalWrite(LED, HIGH);
-      motorOn = true;
-      motorOnTime = millis();
-      digitalWrite(OPENPIN, HIGH);
-      Serial.println("Opening coop door");
-      coopOpen = true;
-    }
-  } else if (coopOpen) {
-    digitalWrite(LED, HIGH);
-    motorOn = true;
-    motorOnTime = millis();
-    digitalWrite(CLOSEPIN, HIGH);
-    Serial.println("Closing coop door");
-    coopOpen = false;
+  if(!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS failed to load");
+    return;
   }
 }
 
