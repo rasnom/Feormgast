@@ -15,7 +15,7 @@
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 bool motorOn = false;
-bool coopOpen = false;  
+bool doorOpen = false;  
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
 unsigned long motorOnTime = 0;
@@ -152,25 +152,34 @@ void setupRoutes() {
   });
 }
 
+void openDoor() {
+  digitalWrite(LED, HIGH);
+  motorOn = true;
+  motorOnTime = millis();
+  digitalWrite(OPENPIN, HIGH);
+  Serial.println("Opening coop door");
+  doorOpen = true;
+}
+
+void closeDoor() {
+  digitalWrite(LED, HIGH);
+  motorOn = true;
+  motorOnTime = millis();
+  digitalWrite(CLOSEPIN, HIGH);
+  Serial.println("Closing coop door");
+  doorOpen = false;
+}
+
 void manageDoor() {
   int hour = rtc.getHour();
 
   if ((OPENTIME <= hour) && (hour < CLOSETIME)) {
-    if (!coopOpen) {
-      digitalWrite(LED, HIGH);
-      motorOn = true;
-      motorOnTime = millis();
-      digitalWrite(OPENPIN, HIGH);
-      Serial.println("Opening coop door");
-      coopOpen = true;
+    if (!doorOpen) {
+      openDoor();
     }
-  } else if (coopOpen) {
-    digitalWrite(LED, HIGH);
-    motorOn = true;
-    motorOnTime = millis();
-    digitalWrite(CLOSEPIN, HIGH);
-    Serial.println("Closing coop door");
-    coopOpen = false;
+  } else 
+    if (doorOpen) {
+      closeDoor();
   }
 }
 
