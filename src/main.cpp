@@ -15,13 +15,12 @@
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 bool motorOn = false;
-bool coopOpen = false;
+bool coopOpen = false;  
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
 unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
 const long motorDuration = 5000;
-
 
 WebServer server(80);
 String header;
@@ -50,58 +49,15 @@ String updateForm() {
 }
 
 String javaScript() {
-  String jscriptCode = 
-    "function Time() {\n"
-        "// Creating object of the Date class\n"
-        "var date = new Date();\n"
-        "var year = date.getYear();\n"
-        "var month = date.getMonth();\n"
-        "var day = date.getDay();\n"
-        "// Get current hour\n"
-        "var hour = date.getHours();\n"
-        "// Get current minute\n"
-        "var minute = date.getMinutes();\n"
-        "// Get current second\n"
-        "var second = date.getSeconds();\n"
-        "// Variable to store AM / PM\n"
-        "var period = \"\";\n"
-        "// Assigning AM / PM according to the current hour\n"
-        "if (hour >= 12) {\n"
-        "period = \"PM\";\n"
-        "} else {\n"
-        "period = \"AM\";\n"
-        "}\n"
-        "// Converting the hour in 12-hour format\n"
-        "if (hour == 0) {\n"
-        "hour = 12;\n"
-        "} else {\n"
-        "if (hour > 12) {\n"
-        "hour = hour - 12;\n"
-        "}\n"
-        "}\n"
-        "// Updating hour, minute, and second\n"
-        "// if they are less than 10\n"
-        "hour = update(hour);\n"
-        "minute = update(minute);\n"
-        "second = update(second);\n"
-        "// Adding time elements to the div\n"
-        "document.getElementById(\"digital-clock\").innerText = hour + \" : \" + minute + \" : \" + second + \" \" + period;\n"
-        "document.getElementById('clientOffset').value = date.getTimezoneOffset();\n"
-        "document.getElementById('clientMillis').value = date.getTime();\n"
-        "// Set Timer to 1 sec (1000 ms)\n"  
-        "setTimeout(Time, 1000);\n"
-    "}\n"
-        "// Function to update time elements if they are less than 10\n"
-        "// Append 0 before time elements if they are less than 10\n"
-    "function update(t) {\n"
-        "if (t < 10) {\n"
-        "return \"0\" + t;\n"
-        "}\n"
-        "else {\n"
-        "return t;\n"
-        "}\n"
-    "}\n"
-    "Time();\n";
+  File file;
+  String jscriptCode; 
+  
+  file = SPIFFS.open("/script.js");
+  if(!file) {
+    Serial.println("failed to load script.js from SPIFFS");
+  }
+  jscriptCode = file.readString();
+
   return jscriptCode;
 }
 
