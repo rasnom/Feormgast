@@ -26,18 +26,26 @@ WebServer server(80);
 String header;
 ESP32Time rtc;
 
-String serverIndex() {
+String readFile(String fileName) {
   File file;
   String fileText;
 
-  file = SPIFFS.open("/index.html");
+  file = SPIFFS.open(fileName);
   if(!file) {
-    Serial.println("failed to load index.html from SPIFFS");
+    Serial.print("failed to load ");
+    Serial.print(fileName);
+    Serial.println(" from SPIFFS");
   }
   fileText = file.readString();
-  fileText.replace("%LOCAL_TIME%", rtc.getTime());
 
-  return fileText;
+  return fileText; 
+}
+
+String serverIndex() {
+  String indexHTML = "";
+  indexHTML = readFile("index.html");
+  indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
+  return indexHTML;
 }
   
 String updateForm() {
@@ -49,15 +57,8 @@ String updateForm() {
 }
 
 String javaScript() {
-  File file;
-  String jscriptCode; 
-  
-  file = SPIFFS.open("/script.js");
-  if(!file) {
-    Serial.println("failed to load script.js from SPIFFS");
-  }
-  jscriptCode = file.readString();
-
+  String jscriptCode = ""; 
+  jscriptCode = readFile("jscript.js");
   return jscriptCode;
 }
 
@@ -180,7 +181,7 @@ void manageDoor() {
   } else 
     if (doorOpen) {
       closeDoor();
-  }
+    }
 }
 
 void setup() {
