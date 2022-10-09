@@ -6,7 +6,7 @@
 #include <SPIFFS.h>
 #include "secrets.h"
 
-#define LED 2
+// #define LED 2
 #define OPENPIN 22
 #define CLOSEPIN 23
 #define OPENTIME 7
@@ -30,6 +30,7 @@ String readFile(String fileName) {
   File file;
   String fileText;
 
+  fileName = "/index.html";
   file = SPIFFS.open(fileName);
   if(!file) {
     Serial.print("failed to load ");
@@ -80,20 +81,9 @@ void setupRoutes() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
   });  
-  server.on("/light/on", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
-    digitalWrite(LED, HIGH);
-  });
-  server.on("/light/off", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
-    digitalWrite(LED, LOW);
-  });
   server.on("/door/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
-    digitalWrite(LED, HIGH);
     motorOn = true;
     motorOnTime = millis();
     digitalWrite(OPENPIN, HIGH);
@@ -101,7 +91,6 @@ void setupRoutes() {
   server.on("/door/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
-    digitalWrite(LED, HIGH);
     motorOn = true;
     motorOnTime = millis();
     digitalWrite(CLOSEPIN, HIGH);
@@ -154,7 +143,6 @@ void setupRoutes() {
 }
 
 void openDoor() {
-  digitalWrite(LED, HIGH);
   motorOn = true;
   motorOnTime = millis();
   digitalWrite(OPENPIN, HIGH);
@@ -163,7 +151,6 @@ void openDoor() {
 }
 
 void closeDoor() {
-  digitalWrite(LED, HIGH);
   motorOn = true;
   motorOnTime = millis();
   digitalWrite(CLOSEPIN, HIGH);
@@ -201,8 +188,8 @@ void setup() {
   setupRoutes();
   server.begin();
 
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, LOW);
+  // pinMode(LED, OUTPUT);
+  // digitalWrite(LED, LOW);
   pinMode(OPENPIN, OUTPUT);
   digitalWrite(OPENPIN, LOW);
   pinMode(CLOSEPIN, OUTPUT);
@@ -218,7 +205,6 @@ void loop() {
   if (motorOn && millis() - motorOnTime >= motorDuration) {
     digitalWrite(OPENPIN, LOW);
     digitalWrite(CLOSEPIN, LOW);
-    digitalWrite(LED, LOW);
     motorOn = false;
   }
   manageDoor();
