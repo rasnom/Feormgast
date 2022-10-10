@@ -30,7 +30,6 @@ String readFile(String fileName) {
   File file;
   String fileText;
 
-  fileName = "/index.html";
   file = SPIFFS.open(fileName);
   if(!file) {
     Serial.print("failed to load ");
@@ -44,7 +43,7 @@ String readFile(String fileName) {
 
 String serverIndex() {
   String indexHTML = "";
-  indexHTML = readFile("index.html");
+  indexHTML = readFile("/index.html");
   indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
   return indexHTML;
 }
@@ -59,7 +58,7 @@ String updateForm() {
 
 String javaScript() {
   String jscriptCode = ""; 
-  jscriptCode = readFile("jscript.js");
+  jscriptCode = readFile("/script.js");
   return jscriptCode;
 }
 
@@ -81,14 +80,14 @@ void setupRoutes() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
   });  
-  server.on("/door/open", HTTP_GET, []() {
+  server.on("/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
     motorOn = true;
     motorOnTime = millis();
     digitalWrite(OPENPIN, HIGH);
   });
-  server.on("/door/close", HTTP_GET, []() {
+  server.on("/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
     motorOn = true;
