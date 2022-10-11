@@ -7,9 +7,9 @@
 #include "secrets.h"
 
 // #define LED 2
-#define OPENPIN 22
-#define CLOSEPIN 23
-#define OPENTIME 7
+#define OPENPIN 23
+#define CLOSEPIN 22
+#define OPENTIME 6
 #define CLOSETIME 20
 
 const char *SSID = "Feormgast";
@@ -20,7 +20,7 @@ unsigned long currentTime = millis();
 unsigned long previousTime = 0;
 unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // milliseconds
-const long motorDuration = 5000;
+const long motorDuration = 4500;
 
 WebServer server(80);
 String header;
