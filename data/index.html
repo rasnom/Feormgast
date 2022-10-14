@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}
+        .button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;
+            text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}
+        .button2 {background-color: #555555;}
+    </style>
+</head>
+<body>
+    <h1>Feormgast Web Server</h1>
+    <p>
+        <div>internal clock : %LOCAL_TIME%</div>
+    </p>
+    <p>
+        <div>user's clock : </div>
+        <div id = "digital-clock"> </div>
+    </p>
+    <p>
+        <form method='GET' action='/clocksync'>
+            <input type='hidden' id='clientMillis' name='clientMillis' value=0>
+            <input type='hidden' id='clientOffset' name='clientOffset' value=0>
+            <input type='submit' value='Sync Local Clock'>
+        </form>
+    </p>
+    <h2>Chicken Coop Door</h2>
+    <p><a href="/open"><button class="button">OPEN</button></a></p>
+    <p><a href="/close"><button class="button">CLOSE</button></a></p>
+    <script src = "script.js"> </script>
+</body>

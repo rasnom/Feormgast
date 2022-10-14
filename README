@@ -1,5 +1,0 @@
-Feormgast 
-[neo-Olde English Farm Spirit]
-ESP32 project to monitor and automate various small agriculture projects
-
-The first use case will be opening and closing the chicken coop door. It should automatically open and close around sun rise/set and be monitored and manually controllable remotely.
