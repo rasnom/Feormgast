@@ -10,7 +10,12 @@ support a variety of home / garden / farm projects.
 
 ## Deployment Instructions
 
-### secrets.H
+### secrets.h
+
+Create text file /src/secrets.h containing the password for the 
+hosted wifi network.
+
+  > const char *AP_WIFI_PASSWORD = "*****";
 
 ### Filesystem Image for SPIFFS
 
@@ -20,39 +25,39 @@ support a variety of home / garden / farm projects.
 
 ## First Prototype BOM
 
- * 1x Unreliable automatic chicken door with dc motor
- * 3x AAA Batteries
- * 1x ESP-WROOM-32 DEVKIT V1 Development Board
- * 1x KeeYees ESP32 Breakout Board
- * 1x Aideepen Dual H-Bridge Motor Driver
- * 1x USB Micro Cord
- * 1x USB Battery Pack
- * Wire & Solder
+* 1x Unreliable automatic chicken door with dc motor
+* 3x AAA Batteries
+* 1x ESP-WROOM-32 DEVKIT V1 Development Board
+* 1x KeeYees ESP32 Breakout Board
+* 1x Aideepen Dual H-Bridge Motor Driver
+* 1x USB Micro Cord
+* 1x USB Battery Pack
+* Wire & Solder
 
 ## Future Development Thoughts
 
- * Clean Code
-  * Unit Testing Framework
-  * Refactor Into Objects
-  * Integration Tests
-  * Diagram
- * Usability 
-  * Interface Design
-  * Async Webserver
- * Power Management
-   * Unify Battery
-   * Battery Monitor 
-    * MAX17043 Board
-   * Low Power / Sleep Mode 
-   * Connect To Network Instead of Hosting
-    * Extend House Wifi 
-    * ESP32 Mesh
-   * Solar Panel
- * Functionality
-  * Endstops
-  * Temperature Control
-  * Humidity Control
-  * Irrigation Control
-  * Camera
-  * Remote Access
-  * Dashboard and/or Notifications
+* Clean Code
+ * Unit Testing Framework
+ * Refactor Into Objects
+ * Integration Tests
+ * Diagram
+* Usability 
+ * Interface Design
+ * Async Webserver
+ * Dashboard and/or Notifications
+* Power Management
+  * Unify Battery
+  * Battery Monitor 
+   * MAX17043 Board
+  * Low Power / Sleep Mode 
+  * Connect To Network Instead of Hosting
+   * Extend House Wifi 
+   * ESP32 Mesh
+  * Solar Panel
+* Functionality
+ * Endstops
+ * Temperature Control
+ * Humidity Control
+ * Irrigation Control
+ * Camera
+ * Remote Access
