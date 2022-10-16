@@ -38,26 +38,32 @@ hosted wifi network.
 
 * Clean Code
  * Unit Testing Framework
- * Refactor Into Objects
+ * **Refactor Into Objects**
  * Integration Tests
  * Diagram
 * Usability 
  * Interface Design
  * Async Webserver
  * Dashboard and/or Notifications
-* Power Management
+* **Power Management**
   * Unify Battery
   * Battery Monitor 
    * MAX17043 Board
-  * Low Power / Sleep Mode 
-  * Connect To Network Instead of Hosting
-   * Extend House Wifi 
-   * ESP32 Mesh
+  * **Low Power / Sleep Mode** 
+  * **Connect To Network Instead of Hosting**
+   * **ESP-NOW Protocol**
+    * **Separate board to bridge to Wifi**
   * Solar Panel
 * Functionality
- * Endstops
+ * **Endstops**
  * Temperature Control
+  * Built In Temp Sensor
  * Humidity Control
  * Irrigation Control
  * Camera
  * Remote Access
+
+### Prototype Two
+
+* Switch Boards (to FireBeetle?)
+ 
