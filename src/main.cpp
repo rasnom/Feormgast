@@ -28,6 +28,7 @@ String header;
 ESP32Time rtc;
 Preferences preferences;
 String unitName;
+String wifiMode;
 
 String readFile(String fileName) {
   File file;
@@ -49,6 +50,7 @@ String serverIndex() {
   indexHTML = readFile("/index.html");
   indexHTML.replace("%UNIT_NAME%", unitName);
   indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
+  indexHTML.replace("%WIFI_MODE%", wifiMode);
   return indexHTML;
 }
   
@@ -103,6 +105,17 @@ void updateFirmware() {
   }
 }
 
+void switchWifiMode() {
+  if (wifiMode == "HUB") {
+    wifiMode = "NODE";
+  } else {
+    wifiMode = "HUB";
+  }
+  preferences.begin("feormgast", false);
+  preferences.putString("wifiMode", wifiMode);
+  preferences.end();
+}
+
 void setupRoutes() {
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
@@ -136,8 +149,15 @@ void setupRoutes() {
     server.send(200, "text/javascript", javaScript());
   });
   server.on("/clocksync", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex());
     Serial.println(server.args());
     clockSync();
+  });
+  server.on("/switchWifiMode", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex());
+    switchWifiMode();
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
@@ -180,8 +200,9 @@ void setup() {
   Serial.begin(115200);
   while(!Serial) { delay(10); };
 
-  preferences.begin("feormgast", false);
+  preferences.begin("feormgast", true);
   unitName = preferences.getString("unitName", "default Hrothgar");
+  wifiMode = preferences.getString("wifiMode", "HUB");
   preferences.end();
 
   // Create Wifi Access Point

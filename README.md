@@ -43,6 +43,8 @@ hosted wifi network.
  * Diagram
 * Usability 
  * Interface Design
+  * Add basic front end framework?
+  * React?
  * Async Webserver
  * Dashboard and/or Notifications
 * **Power Management**
