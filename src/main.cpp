@@ -4,6 +4,7 @@
 #include <Update.h>
 #include <ESP32Time.h>
 #include <SPIFFS.h>
+#include <Preferences.h>
 #include "secrets.h"
 
 // #define LED 2
@@ -25,6 +26,8 @@ const long motorDuration = 4500;
 WebServer server(80);
 String header;
 ESP32Time rtc;
+Preferences preferences;
+String unitName;
 
 String readFile(String fileName) {
   File file;
@@ -44,6 +47,7 @@ String readFile(String fileName) {
 String serverIndex() {
   String indexHTML = "";
   indexHTML = readFile("/index.html");
+  indexHTML.replace("%UNIT_NAME%", unitName);
   indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
   return indexHTML;
 }
@@ -175,6 +179,10 @@ void manageDoor() {
 void setup() {
   Serial.begin(115200);
   while(!Serial) { delay(10); };
+
+  preferences.begin("feormgast", false);
+  unitName = preferences.getString("unitName", "default Hrothgar");
+  preferences.end();
 
   // Create Wifi Access Point
   Serial.print("Creating network ");
