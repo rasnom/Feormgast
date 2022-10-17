@@ -156,8 +156,9 @@ void setupRoutes() {
   });
   server.on("/switchWifiMode", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
+    server.send(200, "text/html", "Restarting");
     switchWifiMode();
+    ESP.restart();
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
@@ -205,15 +206,27 @@ void setup() {
   wifiMode = preferences.getString("wifiMode", "HUB");
   preferences.end();
 
-  // Create Wifi Access Point
-  Serial.print("Creating network ");
+  // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
-  WiFi.softAP(SSID, PASSWORD);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print(" at IP: ");
-  Serial.println(IP);
-  Serial.print("host   ");
+  if (wifiMode == "HUB") {
+    Serial.print("Creating network ");
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(SSID, PASSWORD);
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print(" at IP: ");
+    Serial.println(IP);
+  } else { // "NODE"
+    Serial.print("Joining network");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.print('.');
+      delay(1000);
+    }
+    Serial.print(" at IP ");
+    Serial.println(WiFi.localIP());
+  }
 
   setupRoutes();
   server.begin();
