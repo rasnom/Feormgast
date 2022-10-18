@@ -8,20 +8,22 @@
 #include "secrets.h"
 
 // #define LED 2
-#define OPENPIN 23
-#define CLOSEPIN 22
-#define OPENTIME 6
-#define CLOSETIME 20
+#define OPEN_PIN 23
+#define CLOSE_PIN 22
+#define OPEN_TIME 6
+#define CLOSE_TIME 19
+#define uS_TO_mS 1000
+#define AWAKE_TIME 100000 // mS milliseconds
+#define SLEEP_TIME 1000000 // mS
 
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 bool motorOn = false;
 bool doorOpen = false;  
-unsigned long currentTime = millis();
-unsigned long previousTime = 0;
+unsigned long wakeTime = millis();
 unsigned long motorOnTime = 0;
-const long wifiTimeoutTime = 2000; // milliseconds
-const long motorDuration = 4500;
+const long wifiTimeoutTime = 2000; // mS 
+const long motorDuration = 4500; // mS
 
 WebServer server(80);
 String header;
@@ -126,14 +128,14 @@ void setupRoutes() {
     server.send(200, "text/html", serverIndex());
     motorOn = true;
     motorOnTime = millis();
-    digitalWrite(OPENPIN, HIGH);
+    digitalWrite(OPEN_PIN, HIGH);
   });
   server.on("/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
     motorOn = true;
     motorOnTime = millis();
-    digitalWrite(CLOSEPIN, HIGH);
+    digitalWrite(CLOSE_PIN, HIGH);
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
@@ -173,7 +175,7 @@ void setupRoutes() {
 void openDoor() {
   motorOn = true;
   motorOnTime = millis();
-  digitalWrite(OPENPIN, HIGH);
+  digitalWrite(OPEN_PIN, HIGH);
   Serial.println("Opening coop door");
   doorOpen = true;
 }
@@ -181,7 +183,7 @@ void openDoor() {
 void closeDoor() {
   motorOn = true;
   motorOnTime = millis();
-  digitalWrite(CLOSEPIN, HIGH);
+  digitalWrite(CLOSE_PIN, HIGH);
   Serial.println("Closing coop door");
   doorOpen = false;
 }
@@ -189,7 +191,7 @@ void closeDoor() {
 void manageDoor() {
   int hour = rtc.getHour();
 
-  if ((OPENTIME <= hour) && (hour < CLOSETIME)) {
+  if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
     if (!doorOpen) {
       openDoor();
     }
@@ -231,6 +233,9 @@ void setup() {
   Serial.begin(115200);
   while(!Serial) { delay(10); };
 
+  Serial.print("Woken by ");
+  Serial.println(esp_sleep_get_wakeup_cause());
+
   preferences.begin("feormgast", false);
   if (preferences.isKey("unitName")) {
     unitName = preferences.getString("unitName");
@@ -254,10 +259,10 @@ void setup() {
 
   // pinMode(LED, OUTPUT);
   // digitalWrite(LED, LOW);
-  pinMode(OPENPIN, OUTPUT);
-  digitalWrite(OPENPIN, LOW);
-  pinMode(CLOSEPIN, OUTPUT);
-  digitalWrite(CLOSEPIN, LOW);
+  pinMode(OPEN_PIN, OUTPUT);
+  digitalWrite(OPEN_PIN, LOW);
+  pinMode(CLOSE_PIN, OUTPUT);
+  digitalWrite(CLOSE_PIN, LOW);
 
   if(!SPIFFS.begin(true)) {
     Serial.println("SPIFFS failed to load");
@@ -266,11 +271,20 @@ void setup() {
 }
 
 void loop() {
-  if (motorOn && millis() - motorOnTime >= motorDuration) {
-    digitalWrite(OPENPIN, LOW);
-    digitalWrite(CLOSEPIN, LOW);
-    motorOn = false;
+  if (motorOn) {
+    if (millis() - motorOnTime >= motorDuration) {
+      digitalWrite(OPEN_PIN, LOW);
+      digitalWrite(CLOSE_PIN, LOW);
+      motorOn = false;
+    }
+  } 
+  else if (wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
+    esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
+    Serial.println("Going to sleep");
+    Serial.flush();
+    esp_deep_sleep_start();
   }
+
   manageDoor();
   server.handleClient();
   delay(2);
