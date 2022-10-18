@@ -155,9 +155,11 @@ void setupRoutes() {
     clockSync();
   });
   server.on("/switchWifiMode", HTTP_GET, []() {
+    server.enableDelay(false);
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", "Restarting");
-    switchWifiMode();
+    server.send(200, "text/plain", "Restarting");
+    switchWifiMode(); 
+    delay(1); // prevents the ESP from restarting before the server finishes
     ESP.restart();
   });
   server.onNotFound( []() {
@@ -197,37 +199,56 @@ void manageDoor() {
     }
 }
 
-void setup() {
-  Serial.begin(115200);
-  while(!Serial) { delay(10); };
-
-  preferences.begin("feormgast", true);
-  unitName = preferences.getString("unitName", "default Hrothgar");
-  wifiMode = preferences.getString("wifiMode", "HUB");
-  preferences.end();
-
+void setupWiFi() {
   // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
   if (wifiMode == "HUB") {
-    Serial.print("Creating network ");
-    WiFi.mode(WIFI_AP);
+    Serial.print("Creating Feormgast network ");
+    WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(SSID, PASSWORD);
     IPAddress IP = WiFi.softAPIP();
     Serial.print(" at IP: ");
     Serial.println(IP);
-  } else { // "NODE"
-    Serial.print("Joining network");
+    Serial.print("Hub joining house network");
+    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
+    // WiFi.begin(SSID, PASSWORD); // deployed outside
+  } 
+  else { // "NODE"
+    Serial.print("Node joining house network");
     WiFi.mode(WIFI_STA);
     WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED) {
-      Serial.print('.');
-      delay(1000);
-    }
-    Serial.print(" at IP ");
-    Serial.println(WiFi.localIP());
   }
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }
+  Serial.print(" at IP ");
+  Serial.println(WiFi.localIP());
+}
 
+void setup() {
+  Serial.begin(115200);
+  while(!Serial) { delay(10); };
+
+  preferences.begin("feormgast", false);
+  if (preferences.isKey("unitName")) {
+    unitName = preferences.getString("unitName");
+  }
+  else {
+    unitName = "Hrothgar 1.1";
+    preferences.putString("unitName", unitName);
+  }
+  if (preferences.isKey("wifiMode")) {
+    wifiMode = preferences.getString("wifiMode");
+  }
+  else {
+    wifiMode = "HUB";
+    preferences.putString("wifiMode", wifiMode);
+  }
+  preferences.end();
+
+  setupWiFi();
   setupRoutes();
   server.begin();
 
