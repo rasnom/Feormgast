@@ -19,12 +19,8 @@
 
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
-bool motorOn = false;
-// bool coop.isOpen = false; 
 unsigned long wakeTime = millis();
-unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // mS 
-const long motorDuration = 4500; // mS
 
 WebServer server(80);
 String header;
@@ -75,8 +71,8 @@ void doorLog(String message) {
 }
 
 void openDoor() {
-  motorOn = true;
-  motorOnTime = millis();
+  coop.isMotorOn = true;
+  coop.motorOnTime = millis();
   digitalWrite(OPEN_PIN, HIGH);
   Serial.println("Opening coop door");
   doorLog("open");
@@ -84,8 +80,8 @@ void openDoor() {
 }
 
 void closeDoor() {
-  motorOn = true;
-  motorOnTime = millis();
+  coop.isMotorOn = true;
+  coop.motorOnTime = millis();
   digitalWrite(CLOSE_PIN, HIGH);
   Serial.println("Closing coop door");
   doorLog("close");
@@ -300,11 +296,11 @@ void setup() {
 }
 
 void loop() {
-  if (motorOn) {
-    if (millis() - motorOnTime >= motorDuration) {
+  if (coop.isMotorOn) {
+    if (millis() - coop.motorOnTime >= coop.motorDuration) {
       digitalWrite(OPEN_PIN, LOW);
       digitalWrite(CLOSE_PIN, LOW);
-      motorOn = false;
+      coop.isMotorOn = false;
     }
   } 
   else if (wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
