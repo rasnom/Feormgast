@@ -56,13 +56,18 @@ void doorLog(String message) {
     return;
   }
   if (message == "open") {
-    log.println("Door opened at some time");
+    log.print("Door opened at ");
+    log.println(rtc.getDateTime());
   } 
   else if (message == "close") {
-    log.println("Door closed at some time");
+    log.print("Door closed at ");
+    log.println(rtc.getDateTime());
   }
   else {
-    log.println("Some door event happened : something at some time");
+    log.print("Door event ");
+    log.print(message);
+    log.print(" at ");
+    log.println(rtc.getDateTime());
   }
   log.close();
 }
