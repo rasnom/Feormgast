@@ -9,8 +9,6 @@
 #include "feormcoop.h"
 
 // #define LED 2
-#define OPEN_PIN 23
-#define CLOSE_PIN 22
 #define OPEN_TIME 6
 #define CLOSE_TIME 19
 #define uS_TO_mS 1000
@@ -68,24 +66,6 @@ void doorLog(String message) {
     log.println(rtc.getDateTime());
   }
   log.close();
-}
-
-void openDoor() {
-  coop.isMotorOn = true;
-  coop.motorOnTime = millis();
-  digitalWrite(OPEN_PIN, HIGH);
-  Serial.println("Opening coop door");
-  doorLog("open");
-  coop.isOpen = true;
-}
-
-void closeDoor() {
-  coop.isMotorOn = true;
-  coop.motorOnTime = millis();
-  digitalWrite(CLOSE_PIN, HIGH);
-  Serial.println("Closing coop door");
-  doorLog("close");
-  coop.isOpen = false;
 }
 
 String serverIndex() {
@@ -167,12 +147,12 @@ void setupRoutes() {
   server.on("/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
-    openDoor();
+    coop.openDoor();
   });
   server.on("/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
-    closeDoor();
+    coop.closeDoor();
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
@@ -218,11 +198,11 @@ void manageDoor() {
 
   if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
     if (!coop.isOpen) {
-      openDoor();
+      coop.openDoor();
     }
   } else 
     if (coop.isOpen) {
-      closeDoor();
+      coop.closeDoor();
     }
 }
 
