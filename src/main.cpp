@@ -7,6 +7,7 @@
 #include <Preferences.h>
 #include "secrets.h"
 #include "feormcoop.h"
+#include "feormio.h"
 
 // #define LED 2
 #define uS_TO_mS 1000
@@ -23,8 +24,8 @@ String header;
 ESP32Time rtc;
 Preferences preferences;
 String unitName;
-String wifiMode;
 FeormCoop coop;
+FeormIO comms;
 
 String readFile(String fileName) {
   File file;
@@ -46,7 +47,7 @@ String serverIndex() {
   indexHTML = readFile("/index.html");
   indexHTML.replace("%UNIT_NAME%", unitName);
   indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
-  indexHTML.replace("%WIFI_MODE%", wifiMode);
+  indexHTML.replace("%WIFI_MODE%", comms.wifiMode);
   return indexHTML;
 }
   
@@ -102,13 +103,13 @@ void updateFirmware() {
 }
 
 void switchWifiMode() {
-  if (wifiMode == "HUB") {
-    wifiMode = "NODE";
+  if (comms.wifiMode == "HUB") {
+    comms.wifiMode = "NODE";
   } else {
-    wifiMode = "HUB";
+    comms.wifiMode = "HUB";
   }
   preferences.begin("feormgast", false);
-  preferences.putString("wifiMode", wifiMode);
+  preferences.putString("wifiMode", comms.wifiMode);
   preferences.end();
 }
 
@@ -166,12 +167,11 @@ void setupRoutes() {
   });
 }
 
-
 void setupWiFi() {
   // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
-  if (wifiMode == "HUB") {
+  if (comms.wifiMode == "HUB") {
     Serial.print("Creating Feormgast network ");
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(SSID, PASSWORD);
@@ -211,11 +211,11 @@ void setup() {
     preferences.putString("unitName", unitName);
   }
   if (preferences.isKey("wifiMode")) {
-    wifiMode = preferences.getString("wifiMode");
+    comms.wifiMode = preferences.getString("wifiMode");
   }
   else {
-    wifiMode = "HUB";
-    preferences.putString("wifiMode", wifiMode);
+    comms.wifiMode = "HUB";
+    preferences.putString("wifiMode", comms.wifiMode);
   }
   preferences.end();
 
@@ -244,7 +244,7 @@ void loop() {
       coop.isMotorOn = false;
     }
   } 
-  else if (wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
+  else if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
     esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
     Serial.println("Going to sleep");
     Serial.flush();
