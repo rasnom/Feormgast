@@ -8,7 +8,7 @@
     </style>
 </head>
 <body>
-    <h1>Feormgast Web Server</h1>
+    <h1>Feormgast Unit %UNIT_NAME%</h1>
     <p>
         <div>internal clock : %LOCAL_TIME%</div>
     </p>
@@ -22,6 +22,10 @@
             <input type='hidden' id='clientOffset' name='clientOffset' value=0>
             <input type='submit' value='Sync Local Clock'>
         </form>
+    </p>
+    <p>
+        Wifi Mode: %WIFI_MODE% 
+        <a href="/switchWifiMode"><button class="button">SWITCH</button></a>
     </p>
     <h2>Chicken Coop Door</h2>
     <p><a href="/open"><button class="button">OPEN</button></a></p>
