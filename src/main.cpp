@@ -47,6 +47,46 @@ String readFile(String fileName) {
   return fileText; 
 }
 
+void doorLog(String message) {
+  File log;
+  Serial.print("doorLogging : ");
+  Serial.println(message);
+
+  log = SPIFFS.open("/doorlog.txt", FILE_WRITE);
+  if(!log) {
+    Serial.println("failed to log doorlog.txt from spiffs");
+    return;
+  }
+  if (message == "open") {
+    log.println("Door opened at some time");
+  } 
+  else if (message == "close") {
+    log.println("Door closed at some time");
+  }
+  else {
+    log.println("Some door event happened : something at some time");
+  }
+  log.close();
+}
+
+void openDoor() {
+  motorOn = true;
+  motorOnTime = millis();
+  digitalWrite(OPEN_PIN, HIGH);
+  Serial.println("Opening coop door");
+  doorLog("open");
+  doorOpen = true;
+}
+
+void closeDoor() {
+  motorOn = true;
+  motorOnTime = millis();
+  digitalWrite(CLOSE_PIN, HIGH);
+  Serial.println("Closing coop door");
+  doorLog("close");
+  doorOpen = false;
+}
+
 String serverIndex() {
   String indexHTML = "";
   indexHTML = readFile("/index.html");
@@ -75,12 +115,12 @@ void clockSync() {
   long long millis;
   long offset; 
 
+  server.sendHeader("Connection", "close");
+  server.send(200, "text/html", serverIndex());
   clientMillis = server.arg("clientMillis");
   offset = 60 * atol(server.arg("clientOffset").c_str()); // UTC offset
   millis = atoll(clientMillis.c_str()) / 1000 - offset;
   rtc.setTime(millis);
-  server.sendHeader("Connection", "close");
-  server.send(200, "text/html", serverIndex());
 }
 
 void updateFirmware() {
@@ -126,16 +166,12 @@ void setupRoutes() {
   server.on("/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
-    motorOn = true;
-    motorOnTime = millis();
-    digitalWrite(OPEN_PIN, HIGH);
+    openDoor();
   });
   server.on("/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/html", serverIndex());
-    motorOn = true;
-    motorOnTime = millis();
-    digitalWrite(CLOSE_PIN, HIGH);
+    closeDoor();
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
@@ -170,22 +206,6 @@ void setupRoutes() {
     Serial.println("route not found");
     Serial.println(server.uri());
   });
-}
-
-void openDoor() {
-  motorOn = true;
-  motorOnTime = millis();
-  digitalWrite(OPEN_PIN, HIGH);
-  Serial.println("Opening coop door");
-  doorOpen = true;
-}
-
-void closeDoor() {
-  motorOn = true;
-  motorOnTime = millis();
-  digitalWrite(CLOSE_PIN, HIGH);
-  Serial.println("Closing coop door");
-  doorOpen = false;
 }
 
 void manageDoor() {
