@@ -19,6 +19,19 @@ void FeormCoop::closeDoor() {
   isOpen = false;
 }
 
+void FeormCoop::manageDoor() {
+  int hour = coopClock.getHour();
+
+  if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
+    if (isOpen) {
+      openDoor();
+    }
+  } else 
+    if (isOpen) {
+      closeDoor();
+    }
+}
+
 void FeormCoop::doorLog(String message) {
   File log;
 

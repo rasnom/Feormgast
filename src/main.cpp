@@ -9,8 +9,6 @@
 #include "feormcoop.h"
 
 // #define LED 2
-#define OPEN_TIME 6
-#define CLOSE_TIME 19
 #define uS_TO_mS 1000
 #define AWAKE_TIME 100000 // mS milliseconds
 #define SLEEP_TIME 1000000 // mS
@@ -168,18 +166,6 @@ void setupRoutes() {
   });
 }
 
-void manageDoor() {
-  int hour = rtc.getHour();
-
-  if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
-    if (!coop.isOpen) {
-      coop.openDoor();
-    }
-  } else 
-    if (coop.isOpen) {
-      coop.closeDoor();
-    }
-}
 
 void setupWiFi() {
   // Create or Join Wifi Network
@@ -265,7 +251,7 @@ void loop() {
     esp_deep_sleep_start();
   }
 
-  manageDoor();
+  coop.manageDoor();
   server.handleClient();
   delay(2);
 }
