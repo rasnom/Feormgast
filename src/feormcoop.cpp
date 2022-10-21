@@ -30,6 +30,15 @@ void FeormCoop::manageDoor() {
     if (isOpen) {
       closeDoor();
     }
+
+  if (isMotorOn) {
+    if (millis() - motorOnTime >= motorDuration) {
+      digitalWrite(OPEN_PIN, LOW);
+      digitalWrite(CLOSE_PIN, LOW);
+      isMotorOn = false;
+    }
+  } 
+
 }
 
 void FeormCoop::doorLog(String message) {

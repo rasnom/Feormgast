@@ -237,21 +237,15 @@ void setup() {
 }
 
 void loop() {
-  if (coop.isMotorOn) {
-    if (millis() - coop.motorOnTime >= coop.motorDuration) {
-      digitalWrite(OPEN_PIN, LOW);
-      digitalWrite(CLOSE_PIN, LOW);
-      coop.isMotorOn = false;
-    }
-  } 
-  else if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
+  coop.manageDoor();
+
+  if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
     esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
     Serial.println("Going to sleep");
     Serial.flush();
     esp_deep_sleep_start();
   }
 
-  coop.manageDoor();
   server.handleClient();
   delay(2);
 }
