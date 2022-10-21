@@ -26,7 +26,7 @@ ESP32Time rtc;
 Preferences preferences;
 String unitName;
 String wifiMode;
-feormCoop coop;
+FeormCoop coop;
 
 String readFile(String fileName) {
   File file;
@@ -41,31 +41,6 @@ String readFile(String fileName) {
   fileText = file.readString();
 
   return fileText; 
-}
-
-void doorLog(String message) {
-  File log;
-
-  log = SPIFFS.open("/doorlog.txt", FILE_APPEND);
-  if(!log) {
-    Serial.println("failed to log doorlog.txt from spiffs");
-    return;
-  }
-  if (message == "open") {
-    log.print("Door opened at ");
-    log.println(rtc.getDateTime());
-  } 
-  else if (message == "close") {
-    log.print("Door closed at ");
-    log.println(rtc.getDateTime());
-  }
-  else {
-    log.print("Door event ");
-    log.print(message);
-    log.print(" at ");
-    log.println(rtc.getDateTime());
-  }
-  log.close();
 }
 
 String serverIndex() {

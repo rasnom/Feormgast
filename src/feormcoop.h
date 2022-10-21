@@ -1,13 +1,17 @@
+#include <ESP32Time.h>
+
 #define OPEN_PIN 23
 #define CLOSE_PIN 22
 
-class feormCoop {
+class FeormCoop {
     public:
         bool isOpen = false;
         bool isMotorOn = false;
         unsigned long motorOnTime = 0;
         const long motorDuration = 4500; // mS
+        ESP32Time coopClock;
 
         void openDoor();
         void closeDoor();
+        void doorLog(String);
 };
