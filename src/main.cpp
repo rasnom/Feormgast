@@ -49,10 +49,8 @@ String readFile(String fileName) {
 
 void doorLog(String message) {
   File log;
-  Serial.print("doorLogging : ");
-  Serial.println(message);
 
-  log = SPIFFS.open("/doorlog.txt", FILE_WRITE);
+  log = SPIFFS.open("/doorlog.txt", FILE_APPEND);
   if(!log) {
     Serial.println("failed to log doorlog.txt from spiffs");
     return;
@@ -199,6 +197,10 @@ void setupRoutes() {
     switchWifiMode(); 
     delay(1); // prevents the ESP from restarting before the server finishes
     ESP.restart();
+  });
+  server.on("/log", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/plain", readFile("/doorlog.txt"));
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
