@@ -6,6 +6,7 @@
 #include <SPIFFS.h>
 #include <Preferences.h>
 #include "secrets.h"
+#include "feormcoop.h"
 
 // #define LED 2
 #define OPEN_PIN 23
@@ -19,7 +20,7 @@
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 bool motorOn = false;
-bool doorOpen = false;  
+// bool coop.isOpen = false; 
 unsigned long wakeTime = millis();
 unsigned long motorOnTime = 0;
 const long wifiTimeoutTime = 2000; // mS 
@@ -31,6 +32,7 @@ ESP32Time rtc;
 Preferences preferences;
 String unitName;
 String wifiMode;
+feormCoop coop;
 
 String readFile(String fileName) {
   File file;
@@ -78,7 +80,7 @@ void openDoor() {
   digitalWrite(OPEN_PIN, HIGH);
   Serial.println("Opening coop door");
   doorLog("open");
-  doorOpen = true;
+  coop.isOpen = true;
 }
 
 void closeDoor() {
@@ -87,7 +89,7 @@ void closeDoor() {
   digitalWrite(CLOSE_PIN, HIGH);
   Serial.println("Closing coop door");
   doorLog("close");
-  doorOpen = false;
+  coop.isOpen = false;
 }
 
 String serverIndex() {
@@ -219,11 +221,11 @@ void manageDoor() {
   int hour = rtc.getHour();
 
   if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
-    if (!doorOpen) {
+    if (!coop.isOpen) {
       openDoor();
     }
   } else 
-    if (doorOpen) {
+    if (coop.isOpen) {
       closeDoor();
     }
 }
