@@ -17,7 +17,7 @@
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
 unsigned long wakeTime = millis();
-const long wifiTimeoutTime = 2000; // mS 
+const long wifiTimeoutTime = 5000; // mS 
 
 WebServer server(80);
 String header;
@@ -143,16 +143,15 @@ void setupRoutes() {
   });
   server.on("/clocksync", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
-    Serial.println(server.args());
     clockSync();
+    server.send(200, "text/html", serverIndex());
   });
   server.on("/switchWifiMode", HTTP_GET, []() {
     server.enableDelay(false);
     server.sendHeader("Connection", "close");
     server.send(200, "text/plain", "Restarting");
     switchWifiMode(); 
-    delay(1); // prevents the ESP from restarting before the server finishes
+    delay(100); // prevents the ESP from restarting before the server finishes
     ESP.restart();
   });
   server.on("/log", HTTP_GET, []() {
@@ -193,7 +192,7 @@ void setupWiFi() {
   while (WiFi.status() != WL_CONNECTED) {
     if (millis() > connectStartTime + wifiTimeoutTime) {
       Serial.println("Wifi connection timed out");
-      break;
+      return;
     }
     Serial.print('.');
     delay(1000);
@@ -217,7 +216,7 @@ void setup() {
     unitName = "Hrothgar 1.1";
     preferences.putString("unitName", unitName);
   }
-  if (preferences.isKey("wifiMode")) {
+  if (preferences.isKey("wifiMode") && rtc.getYear() >= 2022) {
     comms.wifiMode = preferences.getString("wifiMode");
   }
   else {
@@ -227,10 +226,9 @@ void setup() {
   preferences.end();
 
   setupWiFi();
-  if (WiFi.status() != WL_CONNECTED) {
-    setupRoutes();
-    server.begin();
-  }
+  setupRoutes();
+  server.begin();
+
   
   // pinMode(LED, OUTPUT);
   // digitalWrite(LED, LOW);
