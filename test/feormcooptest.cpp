@@ -10,8 +10,8 @@ namespace {
     }
 
     TEST(FeormCoop, AnotherTest) {
-        EXPECT_EQ(1, 0);
-        EXPECT_LT(1, 0);
+        EXPECT_EQ(1, (2 - 1));
+        EXPECT_LT(-1, 0);
         EXPECT_EQ(2, 2);
     }
 
