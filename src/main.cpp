@@ -168,6 +168,8 @@ void setupRoutes() {
 }
 
 void setupWiFi() {
+  unsigned long connectStartTime;
+
   // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
@@ -187,7 +189,12 @@ void setupWiFi() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
   }
+  connectStartTime = millis();
   while (WiFi.status() != WL_CONNECTED) {
+    if (millis() > connectStartTime + wifiTimeoutTime) {
+      Serial.println("Wifi connection timed out");
+      break;
+    }
     Serial.print('.');
     delay(1000);
   }
@@ -220,9 +227,11 @@ void setup() {
   preferences.end();
 
   setupWiFi();
-  setupRoutes();
-  server.begin();
-
+  if (WiFi.status() != WL_CONNECTED) {
+    setupRoutes();
+    server.begin();
+  }
+  
   // pinMode(LED, OUTPUT);
   // digitalWrite(LED, LOW);
   pinMode(OPEN_PIN, OUTPUT);
