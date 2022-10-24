@@ -179,26 +179,26 @@ void setupWiFi() {
     IPAddress IP = WiFi.softAPIP();
     Serial.print(" at IP: ");
     Serial.println(IP);
-    Serial.print("Hub joining house network");
-    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
+    // Serial.print("Hub joining house network");
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
     // WiFi.begin(SSID, PASSWORD); // deployed outside
   } 
   else { // "NODE"
-    Serial.print("Node joining house network");
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    // Serial.print("Node joining house network");
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    // connectStartTime = millis();
+    // while (WiFi.status() != WL_CONNECTED) {
+    //   if (millis() > connectStartTime + wifiTimeoutTime) {
+    //     Serial.println("Wifi connection timed out");
+    //     break;
+    //   }
+    //   Serial.print('.');
+    //   delay(1000);
+    // }
+    // Serial.print(" at IP ");
+    // Serial.println(WiFi.localIP());
   }
-  connectStartTime = millis();
-  while (WiFi.status() != WL_CONNECTED) {
-    if (millis() > connectStartTime + wifiTimeoutTime) {
-      Serial.println("Wifi connection timed out");
-      return;
-    }
-    Serial.print('.');
-    delay(1000);
-  }
-  Serial.print(" at IP ");
-  Serial.println(WiFi.localIP());
 }
 
 void setup() {
@@ -216,19 +216,28 @@ void setup() {
     unitName = "Hrothgar 1.1";
     preferences.putString("unitName", unitName);
   }
-  if (preferences.isKey("wifiMode") && rtc.getYear() >= 2022) {
-    comms.wifiMode = preferences.getString("wifiMode");
-  }
-  else {
+  Serial.print("year ");
+  Serial.println(rtc.getYear());
+  // default to "HUB"
+  if (!preferences.isKey("wifiMode") || rtc.getYear() < 2022) {
     comms.wifiMode = "HUB";
     preferences.putString("wifiMode", comms.wifiMode);
+  } 
+  else {
+    comms.wifiMode = preferences.getString("wifiMode");
   }
   preferences.end();
+  Serial.print("Wifi mode ");
+  Serial.println(comms.wifiMode);
 
-  setupWiFi();
-  setupRoutes();
-  server.begin();
-
+  if (comms.wifiMode == "HUB") {
+    Serial.print("Wifi mode ");
+    Serial.println(comms.wifiMode);
+    
+    setupWiFi();
+    setupRoutes();
+    server.begin();
+  }
   
   // pinMode(LED, OUTPUT);
   // digitalWrite(LED, LOW);
@@ -241,6 +250,11 @@ void setup() {
     Serial.println("SPIFFS failed to load");
     return;
   }
+
+  // Close coop door first thing, so we know it starts closed
+  // It will open again right away if it is daytime.
+  Serial.print("Starting up so ");
+  coop.closeDoor();
 }
 
 void loop() {

@@ -2,34 +2,36 @@
 #include "feormcoop.h"
 
 void FeormCoop::openDoor() {
+  digitalWrite(OPEN_PIN, HIGH);
   isMotorOn = true;
   motorOnTime = millis();
-  digitalWrite(OPEN_PIN, HIGH);
+  isOpen = true;
   Serial.println("Opening coop door");
   doorLog("open");
-  isOpen = true;
 }
 
 void FeormCoop::closeDoor() {
+  digitalWrite(CLOSE_PIN, HIGH);
   isMotorOn = true;
   motorOnTime = millis();
-  digitalWrite(CLOSE_PIN, HIGH);
+  isOpen = false;
   Serial.println("Closing coop door");
   doorLog("close");
-  isOpen = false;
 }
 
 void FeormCoop::manageDoor() {
   int hour = coopClock.getHour();
 
   if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
-    if (isOpen) {
+    if (!isOpen) {
+      Serial.print("It's day so ");
       openDoor();
     }
-  } else 
-    if (isOpen) {
-      closeDoor();
-    }
+  } 
+  else if (isOpen) {
+    Serial.print("It's night so ");
+    closeDoor();
+  }
 
   if (isMotorOn) {
     if (millis() - motorOnTime >= motorDuration) {
@@ -38,7 +40,6 @@ void FeormCoop::manageDoor() {
       isMotorOn = false;
     }
   } 
-
 }
 
 void FeormCoop::doorLog(String message) {
