@@ -20,18 +20,7 @@ void FeormCoop::closeDoor() {
 }
 
 void FeormCoop::manageDoor() {
-  int hour = coopClock.getHour();
-
-  if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
-    if (!isOpen) {
-      Serial.print("It's day so ");
-      openDoor();
-    }
-  } 
-  else if (isOpen) {
-    Serial.print("It's night so ");
-    closeDoor();
-  }
+  int hour = coopClock.getHour(true);  // true to get 0-23 rather than 0-12
 
   if (isMotorOn) {
     if (millis() - motorOnTime >= motorDuration) {
@@ -40,6 +29,26 @@ void FeormCoop::manageDoor() {
       isMotorOn = false;
     }
   } 
+  else {
+    if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
+      if (!isOpen) {
+        Serial.print("It's ");
+        Serial.print(hour);
+        Serial.print(" which is after ");
+        Serial.print(OPEN_TIME);
+      Serial.print(" so ");
+        openDoor();
+      }
+    } 
+    else if (isOpen) {
+      Serial.print("It's ");
+      Serial.print(hour);
+      Serial.print(" which is after ");
+      Serial.print(CLOSE_TIME);
+      Serial.print(" so ");
+      closeDoor();
+    }
+  }
 }
 
 void FeormCoop::doorLog(String message) {
