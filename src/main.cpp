@@ -201,13 +201,16 @@ void setupWiFi() {
   }
 }
 
-void setup() {
-  Serial.begin(115200);
-  while(!Serial) { delay(10); };
+void maybeSleep() {
+  if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
+    esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
+    Serial.println("Going to sleep");
+    Serial.flush();
+    esp_deep_sleep_start();
+  }
+}
 
-  Serial.print("Woken by ");
-  Serial.println(esp_sleep_get_wakeup_cause());
-
+void getPreferences() {
   preferences.begin("feormgast", false);
   if (preferences.isKey("unitName")) {
     unitName = preferences.getString("unitName");
@@ -216,8 +219,7 @@ void setup() {
     unitName = "Hrothgar 1.1";
     preferences.putString("unitName", unitName);
   }
-  Serial.print("year ");
-  Serial.println(rtc.getYear());
+  
   // default to "HUB"
   if (!preferences.isKey("wifiMode") || rtc.getYear() < 2022) {
     comms.wifiMode = "HUB";
@@ -227,13 +229,20 @@ void setup() {
     comms.wifiMode = preferences.getString("wifiMode");
   }
   preferences.end();
+}
+
+void setup() {
+  Serial.begin(115200);
+  while(!Serial) { delay(10); };
+
+  Serial.print("Woken by ");
+  Serial.println(esp_sleep_get_wakeup_cause());
+
+  getPreferences();
   Serial.print("Wifi mode ");
   Serial.println(comms.wifiMode);
 
   if (comms.wifiMode == "HUB") {
-    Serial.print("Wifi mode ");
-    Serial.println(comms.wifiMode);
-    
     setupWiFi();
     setupRoutes();
     server.begin();
@@ -257,16 +266,10 @@ void setup() {
   coop.closeDoor();
 }
 
+
 void loop() {
   coop.manageDoor();
-
-  if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
-    esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
-    Serial.println("Going to sleep");
-    Serial.flush();
-    esp_deep_sleep_start();
-  }
-
   server.handleClient();
-  delay(2);
+  delay(10);
+  maybeSleep();
 }
