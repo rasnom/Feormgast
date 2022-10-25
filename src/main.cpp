@@ -3,8 +3,6 @@
 #include <Webserver.h>
 #include <Update.h>
 #include <ESP32Time.h>
-#include <SPIFFS.h>
-#include <Preferences.h>
 #include "secrets.h"
 #include "feormcoop.h"
 #include "feormio.h"
@@ -21,7 +19,6 @@ const long wifiTimeoutTime = 5000; // mS
 
 WebServer server(80);
 ESP32Time rtc;
-Preferences preferences;
 FeormCoop coop;
 FeormIO comms;
 
@@ -159,33 +156,12 @@ void maybeSleep() {
   }
 }
 
-void getPreferences() {
-  preferences.begin("feormgast", false);
-  if (preferences.isKey("unitName")) {
-    comms.unitName = preferences.getString("unitName");
-  }
-  
-  // default to "HUB"
-  if (!preferences.isKey("wifiMode") || rtc.getYear() < 2022) {
-    comms.wifiMode = "HUB";
-    preferences.putString("wifiMode", comms.wifiMode);
-  } 
-  else {
-    comms.wifiMode = preferences.getString("wifiMode");
-  }
-  preferences.end();
-}
-
 void setup() {
   Serial.begin(115200);
   while(!Serial) { delay(10); };
 
   Serial.print("Woken by ");
   Serial.println(esp_sleep_get_wakeup_cause());
-
-  getPreferences();
-  Serial.print("Wifi mode ");
-  Serial.println(comms.wifiMode);
 
   if (comms.wifiMode == "HUB") {
     setupWiFi();
@@ -200,10 +176,7 @@ void setup() {
   pinMode(CLOSE_PIN, OUTPUT);
   digitalWrite(CLOSE_PIN, LOW);
 
-  if(!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS failed to load");
-    return;
-  }
+
 
   // Close coop door first thing, so we know it starts closed
   // It will open again right away if it is daytime.

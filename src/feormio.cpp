@@ -1,5 +1,30 @@
 #include "feormio.h"
 
+FeormIO::FeormIO() {
+  if(!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS failed to load");
+  }
+  getPreferences();
+}
+
+void FeormIO::getPreferences(){
+  preferences.begin("feormgast", false);
+
+  if (preferences.isKey("unitName")) {
+    unitName = preferences.getString("unitName");
+  }
+
+  // If the clock has not been set, default to HUB
+  if (!preferences.isKey("wifiMode") || rtc.getYear() < 2022) {
+    wifiMode = "HUB";
+    preferences.putString("wifiMode", "HUB");
+  } 
+  else {
+    wifiMode = preferences.getString("wifiMode");
+  }
+  preferences.end();
+}
+
 String FeormIO::readFile(String fileName) {
   File file;
   String fileText;
