@@ -25,8 +25,6 @@ Preferences preferences;
 FeormCoop coop;
 FeormIO comms;
 
-
-
 void clockSync() {
   String clientMillis;
   long long millis;
@@ -62,17 +60,6 @@ void updateFirmware() {
   } else {
     Serial.printf("Update Failed: status is %d\n", upload.status);
   }
-}
-
-void switchWifiMode() {
-  if (comms.wifiMode == "HUB") {
-    comms.wifiMode = "NODE";
-  } else {
-    comms.wifiMode = "HUB";
-  }
-  preferences.begin("feormgast", false);
-  preferences.putString("wifiMode", comms.wifiMode);
-  preferences.end();
 }
 
 void setupRoutes() {
@@ -112,7 +99,7 @@ void setupRoutes() {
     server.enableDelay(false);
     server.sendHeader("Connection", "close");
     server.send(200, "text/plain", "Restarting");
-    switchWifiMode(); 
+    comms.switchWifiMode(); 
     delay(100); // prevents the ESP from restarting before the server finishes
     ESP.restart();
   });

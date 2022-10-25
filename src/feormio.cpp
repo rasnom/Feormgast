@@ -39,3 +39,14 @@ String FeormIO::javaScript() {
   jscriptCode = readFile("/script.js");
   return jscriptCode;
 }
+
+void FeormIO::switchWifiMode() {
+  if (wifiMode == "HUB") {
+    wifiMode = "NODE";
+  } else {
+    wifiMode = "HUB";
+  }
+  preferences.begin("feormgast", false);
+  preferences.putString("wifiMode", wifiMode);
+  preferences.end();
+}
