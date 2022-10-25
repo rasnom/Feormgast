@@ -27,24 +27,9 @@ String unitName;
 FeormCoop coop;
 FeormIO comms;
 
-String readFile(String fileName) {
-  File file;
-  String fileText;
-
-  file = SPIFFS.open(fileName);
-  if(!file) {
-    Serial.print("failed to load ");
-    Serial.print(fileName);
-    Serial.println(" from SPIFFS");
-  }
-  fileText = file.readString();
-
-  return fileText; 
-}
-
 String serverIndex() {
   String indexHTML = "";
-  indexHTML = readFile("/index.html");
+  indexHTML = comms.readFile("/index.html");
   indexHTML.replace("%UNIT_NAME%", unitName);
   indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
   indexHTML.replace("%WIFI_MODE%", comms.wifiMode);
@@ -61,7 +46,7 @@ String updateForm() {
 
 String javaScript() {
   String jscriptCode = ""; 
-  jscriptCode = readFile("/script.js");
+  jscriptCode = comms.readFile("/script.js");
   return jscriptCode;
 }
 
@@ -156,7 +141,7 @@ void setupRoutes() {
   });
   server.on("/log", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", readFile("/doorlog.txt"));
+    server.send(200, "text/plain", comms.readFile("/doorlog.txt"));
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
@@ -265,7 +250,6 @@ void setup() {
   Serial.print("Starting up so ");
   coop.closeDoor();
 }
-
 
 void loop() {
   coop.manageDoor();
