@@ -23,18 +23,8 @@ WebServer server(80);
 String header;
 ESP32Time rtc;
 Preferences preferences;
-String unitName;
 FeormCoop coop;
 FeormIO comms;
-
-String serverIndex() {
-  String indexHTML = "";
-  indexHTML = comms.readFile("/index.html");
-  indexHTML.replace("%UNIT_NAME%", unitName);
-  indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
-  indexHTML.replace("%WIFI_MODE%", comms.wifiMode);
-  return indexHTML;
-}
   
 String updateForm() {
   String formHtml = 
@@ -56,7 +46,7 @@ void clockSync() {
   long offset; 
 
   server.sendHeader("Connection", "close");
-  server.send(200, "text/html", serverIndex());
+  server.send(200, "text/html", comms.serverIndex());
   clientMillis = server.arg("clientMillis");
   offset = 60 * atol(server.arg("clientOffset").c_str()); // UTC offset
   millis = atoll(clientMillis.c_str()) / 1000 - offset;
@@ -101,16 +91,16 @@ void switchWifiMode() {
 void setupRoutes() {
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
+    server.send(200, "text/html", comms.serverIndex());
   });  
   server.on("/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
+    server.send(200, "text/html", comms.serverIndex());
     coop.openDoor();
   });
   server.on("/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
+    server.send(200, "text/html", comms.serverIndex());
     coop.closeDoor();
   });
   server.on("/update", HTTP_GET, []() {
@@ -129,7 +119,7 @@ void setupRoutes() {
   server.on("/clocksync", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
     clockSync();
-    server.send(200, "text/html", serverIndex());
+    server.send(200, "text/html", comms.serverIndex());
   });
   server.on("/switchWifiMode", HTTP_GET, []() {
     server.enableDelay(false);
@@ -198,11 +188,7 @@ void maybeSleep() {
 void getPreferences() {
   preferences.begin("feormgast", false);
   if (preferences.isKey("unitName")) {
-    unitName = preferences.getString("unitName");
-  }
-  else {
-    unitName = "Hrothgar 1.1";
-    preferences.putString("unitName", unitName);
+    comms.unitName = preferences.getString("unitName");
   }
   
   // default to "HUB"

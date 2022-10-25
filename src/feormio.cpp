@@ -14,3 +14,15 @@ String FeormIO::readFile(String fileName) {
 
   return fileText; 
 }    
+
+String FeormIO::serverIndex() {
+  String indexHTML = "";
+ 
+  indexHTML = readFile("/index.html");
+  indexHTML.replace("%UNIT_NAME%", unitName);
+  indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
+  indexHTML.replace("%WIFI_MODE%", wifiMode);
+ 
+  return indexHTML;
+}
+
