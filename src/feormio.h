@@ -9,4 +9,6 @@ class FeormIO {
 
         String readFile(String);
         String serverIndex();  
+        String firmwareUpdateForm();
+        String javaScript();
 };

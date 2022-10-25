@@ -26,3 +26,16 @@ String FeormIO::serverIndex() {
   return indexHTML;
 }
 
+String FeormIO::firmwareUpdateForm() {
+  String formHtml = 
+    "<form method='POST' action='/update' enctype='multipart/form-data'>"
+      "<input type='file' name='update'><input type='submit' value='Update'>"
+    "</form>";
+  return formHtml;
+}
+
+String FeormIO::javaScript() {
+  String jscriptCode = ""; 
+  jscriptCode = readFile("/script.js");
+  return jscriptCode;
+}

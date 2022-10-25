@@ -20,25 +20,12 @@ unsigned long wakeTime = millis();
 const long wifiTimeoutTime = 5000; // mS 
 
 WebServer server(80);
-String header;
 ESP32Time rtc;
 Preferences preferences;
 FeormCoop coop;
 FeormIO comms;
-  
-String updateForm() {
-  String formHtml = 
-    "<form method='POST' action='/update' enctype='multipart/form-data'>"
-      "<input type='file' name='update'><input type='submit' value='Update'>"
-    "</form>";
-  return formHtml;
-}
 
-String javaScript() {
-  String jscriptCode = ""; 
-  jscriptCode = comms.readFile("/script.js");
-  return jscriptCode;
-}
+
 
 void clockSync() {
   String clientMillis;
@@ -105,7 +92,7 @@ void setupRoutes() {
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", updateForm());
+    server.send(200, "text/html", comms.firmwareUpdateForm());
   });
   server.on("/update", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
@@ -114,7 +101,7 @@ void setupRoutes() {
   }, updateFirmware);
   server.on("/script.js", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/javascript", javaScript());
+    server.send(200, "text/javascript", comms.javaScript());
   });
   server.on("/clocksync", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
