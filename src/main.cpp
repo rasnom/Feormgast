@@ -3,115 +3,24 @@
 #include <Webserver.h>
 #include <Update.h>
 #include <ESP32Time.h>
-#include <SPIFFS.h>
-#include <Preferences.h>
 #include "secrets.h"
+#include "feormcoop.h"
+#include "feormio.h"
 
 // #define LED 2
-#define OPEN_PIN 23
-#define CLOSE_PIN 22
-#define OPEN_TIME 6
-#define CLOSE_TIME 19
 #define uS_TO_mS 1000
 #define AWAKE_TIME 100000 // mS milliseconds
 #define SLEEP_TIME 1000000 // mS
 
 const char *SSID = "Feormgast";
 const char *PASSWORD = AP_WIFI_PASSWORD;
-bool motorOn = false;
-bool doorOpen = false;  
 unsigned long wakeTime = millis();
-unsigned long motorOnTime = 0;
-const long wifiTimeoutTime = 2000; // mS 
-const long motorDuration = 4500; // mS
+const long wifiTimeoutTime = 5000; // mS 
 
 WebServer server(80);
-String header;
 ESP32Time rtc;
-Preferences preferences;
-String unitName;
-String wifiMode;
-
-String readFile(String fileName) {
-  File file;
-  String fileText;
-
-  file = SPIFFS.open(fileName);
-  if(!file) {
-    Serial.print("failed to load ");
-    Serial.print(fileName);
-    Serial.println(" from SPIFFS");
-  }
-  fileText = file.readString();
-
-  return fileText; 
-}
-
-void doorLog(String message) {
-  File log;
-
-  log = SPIFFS.open("/doorlog.txt", FILE_APPEND);
-  if(!log) {
-    Serial.println("failed to log doorlog.txt from spiffs");
-    return;
-  }
-  if (message == "open") {
-    log.print("Door opened at ");
-    log.println(rtc.getDateTime());
-  } 
-  else if (message == "close") {
-    log.print("Door closed at ");
-    log.println(rtc.getDateTime());
-  }
-  else {
-    log.print("Door event ");
-    log.print(message);
-    log.print(" at ");
-    log.println(rtc.getDateTime());
-  }
-  log.close();
-}
-
-void openDoor() {
-  motorOn = true;
-  motorOnTime = millis();
-  digitalWrite(OPEN_PIN, HIGH);
-  Serial.println("Opening coop door");
-  doorLog("open");
-  doorOpen = true;
-}
-
-void closeDoor() {
-  motorOn = true;
-  motorOnTime = millis();
-  digitalWrite(CLOSE_PIN, HIGH);
-  Serial.println("Closing coop door");
-  doorLog("close");
-  doorOpen = false;
-}
-
-String serverIndex() {
-  String indexHTML = "";
-  indexHTML = readFile("/index.html");
-  indexHTML.replace("%UNIT_NAME%", unitName);
-  indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
-  indexHTML.replace("%WIFI_MODE%", wifiMode);
-  return indexHTML;
-}
-  
-String updateForm() {
-  String formHtml = 
-    "<form method='POST' action='/update' enctype='multipart/form-data'>"
-      "<input type='file' name='update'><input type='submit' value='Update'>"
-    "</form>";
-  return formHtml;
-}
-
-String javaScript() {
-  String jscriptCode = ""; 
-  jscriptCode = readFile("/script.js");
-  return jscriptCode;
-}
+FeormCoop coop;
+FeormIO comms;
 
 void clockSync() {
   String clientMillis;
@@ -119,7 +28,7 @@ void clockSync() {
   long offset; 
 
   server.sendHeader("Connection", "close");
-  server.send(200, "text/html", serverIndex());
+  server.send(200, "text/html", comms.serverIndex());
   clientMillis = server.arg("clientMillis");
   offset = 60 * atol(server.arg("clientOffset").c_str()); // UTC offset
   millis = atoll(clientMillis.c_str()) / 1000 - offset;
@@ -150,35 +59,24 @@ void updateFirmware() {
   }
 }
 
-void switchWifiMode() {
-  if (wifiMode == "HUB") {
-    wifiMode = "NODE";
-  } else {
-    wifiMode = "HUB";
-  }
-  preferences.begin("feormgast", false);
-  preferences.putString("wifiMode", wifiMode);
-  preferences.end();
-}
-
 void setupRoutes() {
   server.on("/", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
+    server.send(200, "text/html", comms.serverIndex());
   });  
   server.on("/open", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
-    openDoor();
+    server.send(200, "text/html", comms.serverIndex());
+    coop.openDoor();
   });
   server.on("/close", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
-    closeDoor();
+    server.send(200, "text/html", comms.serverIndex());
+    coop.closeDoor();
   });
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", updateForm());
+    server.send(200, "text/html", comms.firmwareUpdateForm());
   });
   server.on("/update", HTTP_POST, []() {
     server.sendHeader("Connection", "close");
@@ -187,25 +85,24 @@ void setupRoutes() {
   }, updateFirmware);
   server.on("/script.js", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/javascript", javaScript());
+    server.send(200, "text/javascript", comms.javaScript());
   });
   server.on("/clocksync", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex());
-    Serial.println(server.args());
     clockSync();
+    server.send(200, "text/html", comms.serverIndex());
   });
   server.on("/switchWifiMode", HTTP_GET, []() {
     server.enableDelay(false);
     server.sendHeader("Connection", "close");
     server.send(200, "text/plain", "Restarting");
-    switchWifiMode(); 
-    delay(1); // prevents the ESP from restarting before the server finishes
+    comms.switchWifiMode(); 
+    delay(100); // prevents the ESP from restarting before the server finishes
     ESP.restart();
   });
   server.on("/log", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", readFile("/doorlog.txt"));
+    server.send(200, "text/plain", comms.readFile("/doorlog.txt"));
   });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
@@ -215,45 +112,48 @@ void setupRoutes() {
   });
 }
 
-void manageDoor() {
-  int hour = rtc.getHour();
-
-  if ((OPEN_TIME <= hour) && (hour < CLOSE_TIME)) {
-    if (!doorOpen) {
-      openDoor();
-    }
-  } else 
-    if (doorOpen) {
-      closeDoor();
-    }
-}
-
 void setupWiFi() {
+  unsigned long connectStartTime;
+
   // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
-  if (wifiMode == "HUB") {
+  if (comms.wifiMode == "HUB") {
     Serial.print("Creating Feormgast network ");
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(SSID, PASSWORD);
     IPAddress IP = WiFi.softAPIP();
     Serial.print(" at IP: ");
     Serial.println(IP);
-    Serial.print("Hub joining house network");
-    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
+    // Serial.print("Hub joining house network");
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
     // WiFi.begin(SSID, PASSWORD); // deployed outside
   } 
   else { // "NODE"
-    Serial.print("Node joining house network");
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    // Serial.print("Node joining house network");
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    // connectStartTime = millis();
+    // while (WiFi.status() != WL_CONNECTED) {
+    //   if (millis() > connectStartTime + wifiTimeoutTime) {
+    //     Serial.println("Wifi connection timed out");
+    //     break;
+    //   }
+    //   Serial.print('.');
+    //   delay(1000);
+    // }
+    // Serial.print(" at IP ");
+    // Serial.println(WiFi.localIP());
   }
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(1000);
+}
+
+void maybeSleep() {
+  if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
+    esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
+    Serial.println("Going to sleep");
+    Serial.flush();
+    esp_deep_sleep_start();
   }
-  Serial.print(" at IP ");
-  Serial.println(WiFi.localIP());
 }
 
 void setup() {
@@ -263,27 +163,12 @@ void setup() {
   Serial.print("Woken by ");
   Serial.println(esp_sleep_get_wakeup_cause());
 
-  preferences.begin("feormgast", false);
-  if (preferences.isKey("unitName")) {
-    unitName = preferences.getString("unitName");
+  if (comms.wifiMode == "HUB") {
+    setupWiFi();
+    setupRoutes();
+    server.begin();
   }
-  else {
-    unitName = "Hrothgar 1.1";
-    preferences.putString("unitName", unitName);
-  }
-  if (preferences.isKey("wifiMode")) {
-    wifiMode = preferences.getString("wifiMode");
-  }
-  else {
-    wifiMode = "HUB";
-    preferences.putString("wifiMode", wifiMode);
-  }
-  preferences.end();
-
-  setupWiFi();
-  setupRoutes();
-  server.begin();
-
+  
   // pinMode(LED, OUTPUT);
   // digitalWrite(LED, LOW);
   pinMode(OPEN_PIN, OUTPUT);
@@ -291,28 +176,17 @@ void setup() {
   pinMode(CLOSE_PIN, OUTPUT);
   digitalWrite(CLOSE_PIN, LOW);
 
-  if(!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS failed to load");
-    return;
-  }
+
+
+  // Close coop door first thing, so we know it starts closed
+  // It will open again right away if it is daytime.
+  Serial.print("Starting up so ");
+  coop.closeDoor();
 }
 
 void loop() {
-  if (motorOn) {
-    if (millis() - motorOnTime >= motorDuration) {
-      digitalWrite(OPEN_PIN, LOW);
-      digitalWrite(CLOSE_PIN, LOW);
-      motorOn = false;
-    }
-  } 
-  else if (wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
-    esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
-    Serial.println("Going to sleep");
-    Serial.flush();
-    esp_deep_sleep_start();
-  }
-
-  manageDoor();
+  coop.manageDoor();
   server.handleClient();
-  delay(2);
+  delay(10);
+  maybeSleep();
 }
