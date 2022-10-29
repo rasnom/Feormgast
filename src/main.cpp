@@ -107,7 +107,7 @@ void setupRoutes() {
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
     server.send(404, "text/plain", "Unknown Request");
-    Serial.println("route not found");
+    Serial.print("route not found: ");
     Serial.println(server.uri());
   });
 }
@@ -118,6 +118,8 @@ void setupWiFi() {
   // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
+  Serial.print("Mac Address : ");
+  Serial.println(WiFi.macAddress());
   if (comms.wifiMode == "HUB") {
     Serial.print("Creating Feormgast network ");
     WiFi.mode(WIFI_AP_STA);
