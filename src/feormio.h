@@ -9,14 +9,11 @@ class FeormIO {
         ESP32Time rtc;
         Preferences preferences;
 
-        FeormIO();
-
+        void setup();
         String readFile(String);
         String serverIndex();  
         String firmwareUpdateForm();
         String javaScript();
         void switchWifiMode();
-
-    private:
         void getPreferences();
 };

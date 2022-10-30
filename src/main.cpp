@@ -107,7 +107,7 @@ void setupRoutes() {
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
     server.send(404, "text/plain", "Unknown Request");
-    Serial.println("route not found");
+    Serial.print("route not found: ");
     Serial.println(server.uri());
   });
 }
@@ -118,6 +118,8 @@ void setupWiFi() {
   // Create or Join Wifi Network
   Serial.println(SSID);
   Serial.println(PASSWORD);
+  Serial.print("Mac Address : ");
+  Serial.println(WiFi.macAddress());
   if (comms.wifiMode == "HUB") {
     Serial.print("Creating Feormgast network ");
     WiFi.mode(WIFI_AP_STA);
@@ -163,6 +165,9 @@ void setup() {
   Serial.print("Woken by ");
   Serial.println(esp_sleep_get_wakeup_cause());
 
+  comms.setup();
+  Serial.print("WIfi mode - ");
+  Serial.println(comms.wifiMode);
   if (comms.wifiMode == "HUB") {
     setupWiFi();
     setupRoutes();
@@ -175,8 +180,6 @@ void setup() {
   digitalWrite(OPEN_PIN, LOW);
   pinMode(CLOSE_PIN, OUTPUT);
   digitalWrite(CLOSE_PIN, LOW);
-
-
 
   // Close coop door first thing, so we know it starts closed
   // It will open again right away if it is daytime.
