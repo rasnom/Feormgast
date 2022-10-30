@@ -165,6 +165,9 @@ void setup() {
   Serial.print("Woken by ");
   Serial.println(esp_sleep_get_wakeup_cause());
 
+  comms.setup();
+  Serial.print("WIfi mode - ");
+  Serial.println(comms.wifiMode);
   if (comms.wifiMode == "HUB") {
     setupWiFi();
     setupRoutes();
@@ -177,8 +180,6 @@ void setup() {
   digitalWrite(OPEN_PIN, LOW);
   pinMode(CLOSE_PIN, OUTPUT);
   digitalWrite(CLOSE_PIN, LOW);
-
-
 
   // Close coop door first thing, so we know it starts closed
   // It will open again right away if it is daytime.

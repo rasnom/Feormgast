@@ -1,6 +1,6 @@
 #include "feormio.h"
 
-FeormIO::FeormIO() {
+void FeormIO::setup() {
   if(!SPIFFS.begin(true)) {
     Serial.println("SPIFFS failed to load");
   }
