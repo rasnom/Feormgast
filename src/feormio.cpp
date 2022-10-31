@@ -5,6 +5,13 @@ void FeormIO::setup() {
     Serial.println("SPIFFS failed to load");
   }
   getPreferences();
+  // SSID = "Feormgast";
+  // PASSWORD = AP_WIFI_PASSWORD;
+  setupWiFi();
+  // if (esp_now_init() != ESP_OK) {
+  //   Serial.println("ESP-NOW failed to start");
+  //   return;
+  // }
 }
 
 void FeormIO::getPreferences(){
@@ -74,4 +81,41 @@ void FeormIO::switchWifiMode() {
   preferences.begin("feormgast", false);
   preferences.putString("wifiMode", wifiMode);
   preferences.end();
+}
+
+void FeormIO::setupWiFi() {
+  unsigned long connectStartTime;
+
+  // Create or Join Wifi Network
+  Serial.println(SSID);
+  Serial.println(PASSWORD);
+  Serial.print("Mac Address : ");
+  Serial.println(WiFi.macAddress());
+  if (wifiMode == "HUB") {
+    Serial.print("Creating Feormgast network ");
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(SSID, PASSWORD);
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print(" at IP: ");
+    Serial.println(IP);
+    // Serial.print("Hub joining house network");
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
+    // WiFi.begin(SSID, PASSWORD); // deployed outside
+  } 
+  else { // "NODE"
+    // Serial.print("Node joining house network");
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    // connectStartTime = millis();
+    // while (WiFi.status() != WL_CONNECTED) {
+    //   if (millis() > connectStartTime + wifiTimeoutTime) {
+    //     Serial.println("Wifi connection timed out");
+    //     break;
+    //   }
+    //   Serial.print('.');
+    //   delay(1000);
+    // }
+    // Serial.print(" at IP ");
+    // Serial.println(WiFi.localIP());
+  }
 }

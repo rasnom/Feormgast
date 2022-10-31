@@ -1,9 +1,7 @@
 #include <Arduino.h>
-#include <WiFi.h>
 #include <Webserver.h>
 #include <Update.h>
 #include <ESP32Time.h>
-#include "secrets.h"
 #include "feormcoop.h"
 #include "feormio.h"
 
@@ -12,8 +10,6 @@
 #define AWAKE_TIME 100000 // mS milliseconds
 #define SLEEP_TIME 1000000 // mS
 
-const char *SSID = "Feormgast";
-const char *PASSWORD = AP_WIFI_PASSWORD;
 unsigned long wakeTime = millis();
 const long wifiTimeoutTime = 5000; // mS 
 
@@ -112,43 +108,6 @@ void setupRoutes() {
   });
 }
 
-void setupWiFi() {
-  unsigned long connectStartTime;
-
-  // Create or Join Wifi Network
-  Serial.println(SSID);
-  Serial.println(PASSWORD);
-  Serial.print("Mac Address : ");
-  Serial.println(WiFi.macAddress());
-  if (comms.wifiMode == "HUB") {
-    Serial.print("Creating Feormgast network ");
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.softAP(SSID, PASSWORD);
-    IPAddress IP = WiFi.softAPIP();
-    Serial.print(" at IP: ");
-    Serial.println(IP);
-    // Serial.print("Hub joining house network");
-    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD); // testing inside
-    // WiFi.begin(SSID, PASSWORD); // deployed outside
-  } 
-  else { // "NODE"
-    // Serial.print("Node joining house network");
-    // WiFi.mode(WIFI_STA);
-    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
-    // connectStartTime = millis();
-    // while (WiFi.status() != WL_CONNECTED) {
-    //   if (millis() > connectStartTime + wifiTimeoutTime) {
-    //     Serial.println("Wifi connection timed out");
-    //     break;
-    //   }
-    //   Serial.print('.');
-    //   delay(1000);
-    // }
-    // Serial.print(" at IP ");
-    // Serial.println(WiFi.localIP());
-  }
-}
-
 void maybeSleep() {
   if (comms.wifiMode == "NODE" && millis() - wakeTime > AWAKE_TIME) {
     esp_sleep_enable_timer_wakeup(SLEEP_TIME * uS_TO_mS);
@@ -169,7 +128,6 @@ void setup() {
   Serial.print("WIfi mode - ");
   Serial.println(comms.wifiMode);
   if (comms.wifiMode == "HUB") {
-    setupWiFi();
     setupRoutes();
     server.begin();
   }

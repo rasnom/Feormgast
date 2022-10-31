@@ -1,6 +1,9 @@
 #include <SPIFFS.h>
 #include <ESP32Time.h>
 #include <Preferences.h>
+#include <WiFi.h>
+#include <secrets.h>
+// #include <esp_now.h>
 
 class FeormIO {
     public:
@@ -16,4 +19,10 @@ class FeormIO {
         String javaScript();
         void switchWifiMode();
         void getPreferences();
+
+    private:
+        const char *SSID = "Feormgast";
+        const char *PASSWORD = AP_WIFI_PASSWORD;
+        
+        void setupWiFi();
 };
