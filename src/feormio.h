@@ -3,7 +3,7 @@
 #include <Preferences.h>
 #include <WiFi.h>
 #include <secrets.h>
-// #include <esp_now.h>
+#include <esp_now.h>
 
 class FeormIO {
     public:

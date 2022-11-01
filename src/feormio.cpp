@@ -5,13 +5,11 @@ void FeormIO::setup() {
     Serial.println("SPIFFS failed to load");
   }
   getPreferences();
-  // SSID = "Feormgast";
-  // PASSWORD = AP_WIFI_PASSWORD;
   setupWiFi();
-  // if (esp_now_init() != ESP_OK) {
-  //   Serial.println("ESP-NOW failed to start");
-  //   return;
-  // }
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("ESP-NOW failed to start");
+    return;
+  }
 }
 
 void FeormIO::getPreferences(){
