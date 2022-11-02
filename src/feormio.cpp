@@ -10,6 +10,7 @@ void FeormIO::setup() {
     Serial.println("ESP-NOW failed to start");
     return;
   }
+  esp_now_register_recv_cb(receiveData);
 }
 
 void FeormIO::getPreferences(){
@@ -116,4 +117,11 @@ void FeormIO::setupWiFi() {
     // Serial.print(" at IP ");
     // Serial.println(WiFi.localIP());
   }
+}
+
+void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
+  Serial.print(length);
+  Serial.print(" bytes received from ");
+  Serial.println(*mac);
+  Serial.println(*data);
 }
