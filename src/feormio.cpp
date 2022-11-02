@@ -5,12 +5,18 @@ void FeormIO::setup() {
     Serial.println("SPIFFS failed to load");
   }
   getPreferences();
+  wifiMode = "NODE"; // override for testing
   setupWiFi();
   if (esp_now_init() != ESP_OK) {
     Serial.println("ESP-NOW failed to start");
     return;
   }
-  esp_now_register_recv_cb(receiveData);
+  if (wifiMode == "HUB") {
+    esp_now_register_recv_cb(receiveData);
+  }
+  else { // NODE
+    esp_now_register_send_cb(dataSent);
+  }
 }
 
 void FeormIO::getPreferences(){
@@ -102,20 +108,20 @@ void FeormIO::setupWiFi() {
     // WiFi.begin(SSID, PASSWORD); // deployed outside
   } 
   else { // "NODE"
-    // Serial.print("Node joining house network");
-    // WiFi.mode(WIFI_STA);
-    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
-    // connectStartTime = millis();
-    // while (WiFi.status() != WL_CONNECTED) {
-    //   if (millis() > connectStartTime + wifiTimeoutTime) {
-    //     Serial.println("Wifi connection timed out");
-    //     break;
-    //   }
-    //   Serial.print('.');
-    //   delay(1000);
-    // }
-    // Serial.print(" at IP ");
-    // Serial.println(WiFi.localIP());
+    Serial.print("Node joining house network");
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    connectStartTime = millis();
+    while (WiFi.status() != WL_CONNECTED) {
+      if (millis() > connectStartTime + wifiTimeoutTime) {
+        Serial.println("Wifi connection timed out");
+        break;
+      }
+      Serial.print('.');
+      delay(1000);
+    }
+    Serial.print(" at IP ");
+    Serial.println(WiFi.localIP());
   }
 }
 
@@ -124,4 +130,14 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
   Serial.print(" bytes received from ");
   Serial.println(*mac);
   Serial.println(*data);
+}
+
+void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
+  Serial.print("esp-now packet sent status : ");
+  if (status == ESP_NOW_SEND_SUCCESS) {
+    Serial.println("Success");
+  }
+  else {
+    Serial.println("Failure");
+  }
 }

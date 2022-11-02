@@ -11,7 +11,6 @@
 #define SLEEP_TIME 1000000 // mS
 
 unsigned long wakeTime = millis();
-const long wifiTimeoutTime = 5000; // mS 
 
 WebServer server(80);
 ESP32Time rtc;
