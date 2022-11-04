@@ -15,7 +15,33 @@ void FeormIO::setup() {
     esp_now_register_recv_cb(receiveData);
   }
   else { // NODE
-    esp_now_register_send_cb(dataSent);
+    esp_now_peer_info_t peerInfo = {};
+    esp_err_t result = esp_now_register_send_cb(dataSent);
+    Serial.print("registering send callback and ... ");
+    Serial.println(esp_err_to_name(result));
+
+    memcpy(peerInfo.peer_addr, FIREBEETLE_MAC, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+
+    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+      Serial.println("failed to add peer");
+    }
+
+    int anything = 42;
+
+    Serial.print("trying to send ");
+    Serial.println(anything);
+    // Serial.println(FIREBEETLE_MAC);
+    result = esp_now_send(FIREBEETLE_MAC, (uint8_t  *) &anything, sizeof(anything));
+    Serial.print("ESP err : ");
+    Serial.println(esp_err_to_name(result));
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+    }
+    else {
+      Serial.println("Error sending the data");
+    }
   }
 }
 
@@ -108,20 +134,20 @@ void FeormIO::setupWiFi() {
     // WiFi.begin(SSID, PASSWORD); // deployed outside
   } 
   else { // "NODE"
-    Serial.print("Node joining house network");
+    // Serial.print("Node joining house network");
     WiFi.mode(WIFI_STA);
-    WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
-    connectStartTime = millis();
-    while (WiFi.status() != WL_CONNECTED) {
-      if (millis() > connectStartTime + wifiTimeoutTime) {
-        Serial.println("Wifi connection timed out");
-        break;
-      }
-      Serial.print('.');
-      delay(1000);
-    }
-    Serial.print(" at IP ");
-    Serial.println(WiFi.localIP());
+    // WiFi.begin(HOUSE_WIFI_SSID, HOUSE_WIFI_PASSWORD);
+    // connectStartTime = millis();
+    // while (WiFi.status() != WL_CONNECTED) {
+    //   if (millis() > connectStartTime + wifiTimeoutTime) {
+    //     Serial.println("Wifi connection timed out");
+    //     break;
+    //   }
+    //   Serial.print('.');
+    //   delay(1000);
+    // }
+    // Serial.print(" at IP ");
+    // Serial.println(WiFi.localIP());
   }
 }
 
@@ -135,9 +161,9 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
 void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
   Serial.print("esp-now packet sent status : ");
   if (status == ESP_NOW_SEND_SUCCESS) {
-    Serial.println("Success");
+    Serial.println("ESP-NOW message success");
   }
   else {
-    Serial.println("Failure");
+    Serial.println("ESP-NOW message failure");
   }
 }
