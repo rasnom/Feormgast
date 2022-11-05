@@ -1,42 +1,32 @@
 #include "feormio.h"
 
-void FeormIO::setup() {
-  if(!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS failed to load");
-  }
-  getPreferences();
-  wifiMode = "NODE"; // override for testing
-  setupWiFi();
+void FeormIO::setupESPNow() {
   if (esp_now_init() != ESP_OK) {
     Serial.println("ESP-NOW failed to start");
     return;
   }
+
   if (wifiMode == "HUB") {
     esp_now_register_recv_cb(receiveData);
   }
   else { // NODE
-    esp_now_peer_info_t peerInfo = {};
-    esp_err_t result = esp_now_register_send_cb(dataSent);
-    Serial.print("registering send callback and ... ");
-    Serial.println(esp_err_to_name(result));
+    esp_now_peer_info_t peerInfo = {};  
 
-    memcpy(peerInfo.peer_addr, FIREBEETLE_MAC, 6);
+    esp_now_register_send_cb(dataSent);
+    
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
+    memcpy(peerInfo.peer_addr, FIREBEETLE_MAC, 6);
 
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
       Serial.println("failed to add peer");
     }
 
     int anything = 42;
-
     Serial.print("trying to send ");
     Serial.println(anything);
-    // Serial.println(FIREBEETLE_MAC);
-    result = esp_now_send(FIREBEETLE_MAC, (uint8_t  *) &anything, sizeof(anything));
-    Serial.print("ESP err : ");
-    Serial.println(esp_err_to_name(result));
-    if (result == ESP_OK) {
+    esp_err_t msgResult = esp_now_send(FIREBEETLE_MAC, (uint8_t  *) &anything, sizeof(anything));
+    if (msgResult == ESP_OK) {
       Serial.println("Sent with success");
     }
     else {
@@ -45,7 +35,20 @@ void FeormIO::setup() {
   }
 }
 
+void FeormIO::setup() {
+  getPreferences();
+  wifiMode = "NODE"; // override for testing
+  setupWiFi();
+  setupESPNow();
+
+
+}
+
 void FeormIO::getPreferences(){
+  if(!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS failed to load");
+  }
+
   preferences.begin("feormgast", false);
 
   if (preferences.isKey("unitName")) {
@@ -60,6 +63,7 @@ void FeormIO::getPreferences(){
   else {
     wifiMode = preferences.getString("wifiMode");
   }
+  
   preferences.end();
 }
 
