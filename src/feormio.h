@@ -27,6 +27,7 @@ class FeormIO {
         static void receiveData(const uint8_t *mac, const uint8_t *data, int length);
         static void dataSent(const uint8_t *mac, esp_now_send_status_t status);
         void setupESPNow();
+        void sendNote(String str);
 
     private:
         const char *SSID = "Feormgast";

@@ -10,38 +10,36 @@ void FeormIO::setupESPNow() {
     esp_now_register_recv_cb(receiveData);
   }
   else { // NODE
-    esp_now_peer_info_t peerInfo = {};  
-
     esp_now_register_send_cb(dataSent);
     
+    esp_now_peer_info_t peerInfo = {};  
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
     memcpy(peerInfo.peer_addr, FIREBEETLE_MAC, 6);
-
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
       Serial.println("failed to add peer");
     }
 
-    int anything = 42;
-    Serial.print("trying to send ");
-    Serial.println(anything);
-    esp_err_t msgResult = esp_now_send(FIREBEETLE_MAC, (uint8_t  *) &anything, sizeof(anything));
-    if (msgResult == ESP_OK) {
-      Serial.println("Sent with success");
-    }
-    else {
-      Serial.println("Error sending the data");
-    }
+    sendNote("anything or nothing");
+  }
+}
+
+void FeormIO::sendNote(String str) {
+  Serial.print("trying to send ");
+  Serial.println(str);
+  esp_err_t msgResult = esp_now_send(FIREBEETLE_MAC, (uint8_t  *) &str, sizeof(str));
+  if (msgResult == ESP_OK) {
+    Serial.println("Sent with success");
+  }
+  else {
+    Serial.println("Error sending the data");
   }
 }
 
 void FeormIO::setup() {
   getPreferences();
-  wifiMode = "NODE"; // override for testing
   setupWiFi();
   setupESPNow();
-
-
 }
 
 void FeormIO::getPreferences(){
