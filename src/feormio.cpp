@@ -37,16 +37,15 @@ void FeormIO::sendNote(String str) {
 }
 
 void FeormIO::setup() {
+  if(!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS failed to load");
+  }
   getPreferences();
   setupWiFi();
   setupESPNow();
 }
 
 void FeormIO::getPreferences(){
-  if(!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS failed to load");
-  }
-
   preferences.begin("feormgast", false);
 
   if (preferences.isKey("unitName")) {
@@ -167,5 +166,17 @@ void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
   }
   else {
     Serial.println("ESP-NOW message failure");
+  }
+}
+
+void FeormIO::writeLog(String message) {
+  File log;
+
+  log = SPIFFS.open("/IOLog.txt", FILE_APPEND);
+  if (!log) {
+    Serial.println("failed to load IOLog.txt from spiffs");
+    return;
+  } else {
+    log.println(message);
   }
 }

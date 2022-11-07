@@ -1,4 +1,3 @@
-#include <SPIFFS.h>
 #include "feormcoop.h"
 
 void FeormCoop::openDoor() {

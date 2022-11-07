@@ -1,4 +1,5 @@
 #include <ESP32Time.h>
+#include <SPIFFS.h> 
 
 #define OPEN_PIN 23
 #define CLOSE_PIN 22
