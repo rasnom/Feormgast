@@ -99,6 +99,10 @@ void setupRoutes() {
     server.sendHeader("Connection", "close");
     server.send(200, "text/plain", comms.readFile("/doorlog.txt"));
   });
+  server.on("/iolog", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/plain", comms.readFile("/iolog.txt"));
+  });
   server.onNotFound( []() {
     server.sendHeader("Connection", "close");
     server.send(404, "text/plain", "Unknown Request");

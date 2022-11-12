@@ -168,6 +168,10 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
   Serial.print(" bytes received from ");
   Serial.println(*mac);
   Serial.println(received.text);
+
+  String logEntry = "received espNOW message : ";
+  logEntry.concat(received.text);
+  writeLog(logEntry);
 }
 
 void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
@@ -183,7 +187,7 @@ void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
 void FeormIO::writeLog(String message) {
   File log;
 
-  log = SPIFFS.open("/IOLog.txt", FILE_APPEND);
+  log = SPIFFS.open("/iolog.txt", FILE_APPEND);
   if (!log) {
     Serial.println("failed to load IOLog.txt from spiffs");
     return;
