@@ -73,4 +73,6 @@ void FeormCoop::doorLog(String message) {
     log.println(coopClock.getDateTime());
   }
   log.close();
+
+  FeormIO::sendNote(message); 
 }

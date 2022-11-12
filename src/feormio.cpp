@@ -62,6 +62,9 @@ void FeormIO::getPreferences(){
   }
   
   preferences.end();
+
+  Serial.println("overriding to NODE for testing");
+  wifiMode = "NODE";
 }
 
 String FeormIO::readFile(String fileName) {
