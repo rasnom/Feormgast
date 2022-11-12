@@ -8,9 +8,6 @@
 #include <secrets.h>
 #include <esp_now.h>
 
-
-// const uint8_t BROADCAST_ALL[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
 class FeormIO {
     public:
         const long wifiTimeoutTime = 7000; // mS 
@@ -19,6 +16,8 @@ class FeormIO {
         String unitName = "Default Hrothgar";
         ESP32Time rtc;
         Preferences preferences;
+        // uint8_t SEND_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
 
         void setup();
         String readFile(String);
@@ -38,6 +37,10 @@ class FeormIO {
         const char *PASSWORD = AP_WIFI_PASSWORD;
         
         void setupWiFi();
+};
+
+struct espMessage {
+    char text[32];
 };
 
 #endif // FEORMIO_H_

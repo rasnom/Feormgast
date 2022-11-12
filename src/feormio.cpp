@@ -25,9 +25,14 @@ void FeormIO::setupESPNow() {
 }
 
 void FeormIO::sendNote(String str) {
+  espMessage toSend;
+
+  strcpy(toSend.text, str.c_str());
   Serial.print("trying to send ");
-  Serial.println(str);
-  esp_err_t msgResult = esp_now_send(FIREBEETLE_MAC, (uint8_t  *) &str, sizeof(str));
+  Serial.println(toSend.text);
+  Serial.print("in struct with size ");
+  Serial.println(sizeof(toSend));
+  esp_err_t msgResult = esp_now_send(FIREBEETLE_MAC, (uint8_t*) &toSend, sizeof(toSend));
   if (msgResult == ESP_OK) {
     Serial.println("Sent with success");
   }
@@ -63,8 +68,8 @@ void FeormIO::getPreferences(){
   
   preferences.end();
 
-  Serial.println("overriding to NODE for testing");
-  wifiMode = "NODE";
+  // Serial.println("overriding to NODE for testing");
+  // wifiMode = "NODE";
 }
 
 String FeormIO::readFile(String fileName) {
@@ -156,10 +161,13 @@ void FeormIO::setupWiFi() {
 }
 
 void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
+  espMessage received;
+  memcpy(&received, data, sizeof(received));
+
   Serial.print(length);
   Serial.print(" bytes received from ");
   Serial.println(*mac);
-  Serial.println(*data);
+  Serial.println(received.text);
 }
 
 void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
