@@ -1,3 +1,6 @@
+#ifndef FEORMIO_H_
+#define FEORMIO_H_
+
 #include <SPIFFS.h>
 #include <ESP32Time.h>
 #include <Preferences.h>
@@ -36,3 +39,5 @@ class FeormIO {
         
         void setupWiFi();
 };
+
+#endif // FEORMIO_H_

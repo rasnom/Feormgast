@@ -1,5 +1,6 @@
 #include <ESP32Time.h>
-#include <SPIFFS.h> 
+#include <SPIFFS.h>
+#include "feormio.h"
 
 #define OPEN_PIN 23
 #define CLOSE_PIN 22
