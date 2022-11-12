@@ -40,7 +40,7 @@ class FeormIO {
 };
 
 struct espMessage {
-    char text[32];
+    char text[64];
 };
 
 #endif // FEORMIO_H_

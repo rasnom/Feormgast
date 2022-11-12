@@ -151,9 +151,6 @@ void setup() {
 void loop() {
   coop.manageDoor();
   server.handleClient();
-  if (comms.wifiMode == "NODE") {
-    FeormIO::sendNote("a note from main loop");
-  }
-  delay(400);
+  delay(100);
   maybeSleep();
 }

@@ -52,27 +52,32 @@ void FeormCoop::manageDoor() {
 
 void FeormCoop::doorLog(String message) {
   File log;
+  String logText = "";
+
+  if (message == "open") {
+    logText.concat("Door opened at ");
+    logText.concat(coopClock.getDateTime());
+  } 
+  else if (message == "close") {
+    logText.concat("Door closed at ");
+    logText.concat(coopClock.getDateTime());
+  }
+  else {
+    logText.concat("Door event ");
+    logText.concat(message);
+    logText.concat(" at ");
+    logText.concat(coopClock.getDateTime());
+  }
 
   log = SPIFFS.open("/doorlog.txt", FILE_APPEND);
   if(!log) {
     Serial.println("failed to log doorlog.txt from spiffs");
     return;
-  }
-  if (message == "open") {
-    log.print("Door opened at ");
-    log.println(coopClock.getDateTime());
   } 
-  else if (message == "close") {
-    log.print("Door closed at ");
-    log.println(coopClock.getDateTime());
-  }
   else {
-    log.print("Door event ");
-    log.print(message);
-    log.print(" at ");
-    log.println(coopClock.getDateTime());
+    log.println(logText);
   }
   log.close();
 
-  FeormIO::sendNote(message); 
+  FeormIO::sendNote(logText); 
 }

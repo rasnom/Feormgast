@@ -19,8 +19,9 @@ void FeormIO::setupESPNow() {
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
       Serial.println("failed to add peer");
     }
-
-    sendNote("anything or nothing");
+    else {
+      sendNote("esp-now is set up");
+    }
   }
 }
 
