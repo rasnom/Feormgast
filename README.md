@@ -39,7 +39,7 @@ hosted wifi network.
 * Clean Code
  * Unit Testing Framework
  * **Refactor Into Objects**
-  * or maybe Modules
+  * ~~or maybe Modules~~
  * Integration Tests
  * Diagram
 * Usability 

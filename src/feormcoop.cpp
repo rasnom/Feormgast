@@ -1,5 +1,12 @@
 #include "feormcoop.h"
 
+FeormCoop::FeormCoop() {
+  pinMode(OPEN_PIN, OUTPUT);
+  digitalWrite(OPEN_PIN, LOW);
+  pinMode(CLOSE_PIN, OUTPUT);
+  digitalWrite(CLOSE_PIN, LOW);
+}
+
 void FeormCoop::openDoor() {
   digitalWrite(OPEN_PIN, HIGH);
   isMotorOn = true;

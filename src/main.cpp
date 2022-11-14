@@ -12,7 +12,7 @@
 
 unsigned long wakeTime = millis();
 
-WebServer server(80);
+WebSerxver server(80);
 ESP32Time rtc;
 FeormCoop coop;
 FeormIO comms;
@@ -134,13 +134,6 @@ void setup() {
     setupRoutes();
     server.begin();
   }
-  
-  // pinMode(LED, OUTPUT);
-  // digitalWrite(LED, LOW);
-  pinMode(OPEN_PIN, OUTPUT);
-  digitalWrite(OPEN_PIN, LOW);
-  pinMode(CLOSE_PIN, OUTPUT);
-  digitalWrite(CLOSE_PIN, LOW);
 
   // Close coop door first thing, so we know it starts closed
   // It will open again right away if it is daytime.

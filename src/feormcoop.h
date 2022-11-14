@@ -15,6 +15,8 @@ class FeormCoop {
         const long motorDuration = 4000; // mS
         ESP32Time coopClock;
 
+        FeormCoop();
+
         void openDoor();
         void closeDoor();
         void doorLog(String);
