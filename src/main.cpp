@@ -12,7 +12,7 @@
 
 unsigned long wakeTime = millis();
 
-WebSerxver server(80);
+WebServer server(80);
 ESP32Time rtc;
 FeormCoop coop;
 FeormIO comms;

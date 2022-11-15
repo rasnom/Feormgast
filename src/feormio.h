@@ -8,7 +8,7 @@
 #include <secrets.h>
 #include <esp_now.h>
 
-class FeormIO {
+class FeormIO { 
     public:
         const long wifiTimeoutTime = 7000; // mS 
 
