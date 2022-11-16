@@ -1,5 +1,8 @@
 #include "feormio.h"
 
+String FeormIO::lastContactTime;
+espMessage FeormIO::lastContact;
+
 void FeormIO::setupESPNow() {
   if (esp_now_init() != ESP_OK) {
     Serial.println("ESP-NOW failed to start");
@@ -46,6 +49,8 @@ void FeormIO::setup() {
   if(!SPIFFS.begin(true)) {
     Serial.println("SPIFFS failed to load");
   }
+  lastContactTime = "not yet";
+  strcpy(lastContact.text, "no messages received since last reboot");
   getPreferences();
   setupWiFi();
   setupESPNow();
@@ -95,6 +100,8 @@ String FeormIO::serverIndex() {
   indexHTML.replace("%UNIT_NAME%", unitName);
   indexHTML.replace("%LOCAL_TIME%", rtc.getTime());
   indexHTML.replace("%WIFI_MODE%", wifiMode);
+  indexHTML.replace("%LAST_CONTACT_TIME%", lastContactTime);
+  indexHTML.replace("%LAST_CONTACT_MESSAGE", lastContact.text);
  
   return indexHTML;
 }
@@ -170,8 +177,11 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
   Serial.println(*mac);
   Serial.println(received.text);
 
+  lastContactTime = "blarg"; // rtc.getTime();
+  strcpy(lastContact.text, received.text);
+
   String logEntry = "received espNOW message : ";
-  logEntry.concat(received.text);
+  logEntry.concat(lastContact.text);
   writeLog(logEntry);
 }
 
