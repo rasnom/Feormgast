@@ -171,13 +171,14 @@ void FeormIO::setupWiFi() {
 void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
   espMessage received;
   memcpy(&received, data, sizeof(received));
+  FeormIO instance;
 
   Serial.print(length);
   Serial.print(" bytes received from ");
   Serial.println(*mac);
   Serial.println(received.text);
 
-  lastContactTime = "blarg"; // rtc.getTime();
+  lastContactTime = instance.rtc.getTime();
   strcpy(lastContact.text, received.text);
 
   String logEntry = "received espNOW message : ";
