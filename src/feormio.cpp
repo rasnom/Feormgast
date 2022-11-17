@@ -31,6 +31,7 @@ void FeormIO::setupESPNow() {
 void FeormIO::sendNote(String str) {
   espMessage toSend;
 
+  toSend.type = ESP_NOTE;
   strcpy(toSend.text, str.c_str());
   Serial.print("trying to send ");
   Serial.println(toSend.text);
@@ -172,6 +173,7 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
   espMessage received;
   memcpy(&received, data, sizeof(received));
   FeormIO instance;
+  String logEntry;
 
   Serial.print(length);
   Serial.print(" bytes received from ");
@@ -181,9 +183,18 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
   lastContactTime = instance.rtc.getTime();
   strcpy(lastContact.text, received.text);
 
-  String logEntry = "received espNOW message : ";
-  logEntry.concat(lastContact.text);
-  writeLog(logEntry);
+  switch (received.type) {
+    case ESP_NOTE:
+      logEntry = "received espNOW Note : ";
+      logEntry.concat(lastContact.text);
+      writeLog(logEntry);
+      break;
+    default:
+      logEntry = "received espNOW message of unknown type : ";
+      logEntry.concat(lastContact.text);
+      writeLog(logEntry);
+      break;
+  }
 }
 
 void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {

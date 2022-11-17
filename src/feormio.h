@@ -8,7 +8,11 @@
 #include <secrets.h>
 #include <esp_now.h>
 
+
+enum messageType {ESP_NOTE, ESP_STATUS, ESP_COMMAND};
+
 struct espMessage {
+    messageType type;
     char text[64];
 };
 
@@ -17,7 +21,7 @@ class FeormIO {
         const long wifiTimeoutTime = 7000; // mS 
 
         String wifiMode = "HUB";
-        String unitName = "Default Hrothgar";
+        String unitName = "Default Name";
         ESP32Time rtc;
         Preferences preferences;
         static String lastContactTime;
