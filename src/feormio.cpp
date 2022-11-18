@@ -48,6 +48,21 @@ void FeormIO::sendNote(String str) {
   }
 }
 
+void FeormIO::requestStatus() {
+  espMessage toSend;
+
+  toSend.type = ESP_SEND_STATUS;
+  strcpy(toSend.text, "request for unit status");
+
+  esp_err_t msgResult = esp_now_send(FIREBEETLE_MAC, (uint8_t*) &toSend, sizeof(toSend));
+  if (msgResult == ESP_OK) {
+    Serial.println("Sent with success");
+  }
+  else {
+    Serial.println("Error sending the data");
+  }
+}
+
 void FeormIO::setup() {
   if(!SPIFFS.begin(true)) {
     Serial.println("SPIFFS failed to load");
@@ -189,14 +204,17 @@ void FeormIO::receiveData(const uint8_t *mac, const uint8_t *data, int length) {
     case ESP_NOTE:
       logEntry = "received espNOW Note : ";
       logEntry.concat(lastContact.text);
-      writeLog(logEntry);
       break;
+    case ESP_SEND_STATUS:
+      logEntry = "received request to send status";
+    case ESP_STATUS:
+      logEntry = "received status update";
     default:
       logEntry = "received espNOW message of unknown type : ";
       logEntry.concat(lastContact.text);
-      writeLog(logEntry);
       break;
   }
+      writeLog(logEntry);
 }
 
 void FeormIO::dataSent(const uint8_t *mac, esp_now_send_status_t status) {
