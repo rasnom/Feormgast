@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="39cm" height="13cm" viewBox="120 122 761 241" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="353.607" y="182.6" width="112.559" height="178.151"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="353.607" y="182.6" width="112.559" height="178.151"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="409.886" y="267.576">
+      <tspan x="409.886" y="267.576">ESP32</tspan>
+      <tspan x="409.886" y="283.576">HUB</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="594.603" y="183.1" width="112.498" height="178.497"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="594.603" y="183.1" width="112.498" height="178.497"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="650.852" y="268.249">
+      <tspan x="650.852" y="268.249">ESP32</tspan>
+      <tspan x="650.852" y="284.249">NODE</tspan>
+    </text>
+  </g>
+  <g>
+    <path style="fill: #ffffff" d="M 150.087 254.865 L 200.579,254.865 C 207.55,254.865 213.202,235.389 213.202,211.365 C 213.202,187.34 207.55,167.865 200.579,167.865 L 150.087,167.865 C 143.116,167.865 137.464,187.34 137.464,211.365 C 137.464,235.389 143.116,254.865 150.087,254.865z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 150.087 254.865 L 200.579,254.865 C 207.55,254.865 213.202,235.389 213.202,211.365 C 213.202,187.34 207.55,167.865 200.579,167.865 L 150.087,167.865 C 143.116,167.865 137.464,187.34 137.464,211.365 C 137.464,235.389 143.116,254.865 150.087,254.865"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="175.333" y="215.365">
+      <tspan x="175.333" y="215.365">Phone</tspan>
+    </text>
+  </g>
+  <g>
+    <path style="fill: #ffffff" d="M 139.105 285.501 L 208.755,285.501 C 218.371,285.501 226.167,299.827 226.167,317.501 C 226.167,335.174 218.371,349.501 208.755,349.501 L 139.105,349.501 C 129.488,349.501 121.692,335.174 121.692,317.501 C 121.692,299.827 129.488,285.501 139.105,285.501z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 139.105 285.501 L 208.755,285.501 C 218.371,285.501 226.167,299.827 226.167,317.501 C 226.167,335.174 218.371,349.501 208.755,349.501 L 139.105,349.501 C 129.488,349.501 121.692,335.174 121.692,317.501 C 121.692,299.827 129.488,285.501 139.105,285.501"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="173.93" y="321.501">
+      <tspan x="173.93" y="321.501">Computer</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="358.458" y="302.153" width="102.718" height="47.9017"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="358.458" y="302.153" width="102.718" height="47.9017"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="409.818" y="330.004">
+      <tspan x="409.818" y="330.004">Webserver</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="774.437" y="278.278" width="72.55" height="50.3806"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 4; stroke: #000000" x="774.437" y="278.278" width="72.55" height="50.3806"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="810.712" y="307.368">
+      <tspan x="810.712" y="307.368">Sensors</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="774.853" y="217.735" width="105.725" height="48"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="774.853" y="217.735" width="105.725" height="48"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="827.715" y="245.635">
+      <tspan x="827.715" y="245.635">Door Motor</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 4; stroke: #000000" x1="774.437" y1="303.468" x2="711.485" y2="316.094"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="718.115,309.665 709.293,316.533 720.081,319.469 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="707.101" y1="227.725" x2="770.473" y2="240.829"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="761.858,244.154 772.663,241.282 763.883,234.361 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 470.181 273.646 C 534.105,305.023 519.705,235.448 590.591,270.372"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="479.353,272.579 468.173,272.661 474.947,281.556 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="581.417,271.426 592.597,271.361 585.836,262.456 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 229.939 319.904 C 283.608,354.097 268.96,298.653 354.366,336.276"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="239.174,319.859 228.053,318.702 233.8,328.292 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="345.245,337.722 356.412,337.178 349.276,328.571 "/>
+  </g>
+  <g>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 217.596 210.536 C 275.608,199.6 236.492,301.477 354.01,313.667"/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="224.3,204.185 215.399,210.951 226.152,214.011 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="345.772,317.839 356.234,313.898 346.804,307.893 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="281.089" y="224.48">
+    <tspan x="281.089" y="224.48">WiFi</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="503.426" y="224.395">
+    <tspan x="503.426" y="224.395">ESP-NOW</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="719.083" y="209.1">
+    <tspan x="719.083" y="209.1">IO Pins</tspan>
+  </text>
+  <text font-size="20.8841" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="265.439" y="141.905">
+    <tspan x="265.439" y="141.905">Feormgast Communication System Diagram</tspan>
+  </text>
+</svg>
