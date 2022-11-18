@@ -9,22 +9,24 @@ void FeormIO::setupESPNow() {
     return;
   }
 
+  esp_now_register_recv_cb(receiveData);
+  esp_now_register_send_cb(dataSent);
+  esp_now_peer_info_t peerInfo = {};  
+  peerInfo.channel = 0;
+  peerInfo.encrypt = false;
+
   if (wifiMode == "HUB") {
-    esp_now_register_recv_cb(receiveData);
+    memcpy(peerInfo.peer_addr, HELTEC_MAC, 6);
   }
   else { // NODE
-    esp_now_register_send_cb(dataSent);
-    
-    esp_now_peer_info_t peerInfo = {};  
-    peerInfo.channel = 0;
-    peerInfo.encrypt = false;
     memcpy(peerInfo.peer_addr, FIREBEETLE_MAC, 6);
-    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-      Serial.println("failed to add peer");
-    }
-    else {
-      sendNote("esp-now is set up");
-    }
+  }
+
+  if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+    Serial.println("failed to add peer");
+  }
+  else {
+    sendNote("esp-now is set up");
   }
 }
 
